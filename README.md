@@ -97,7 +97,7 @@ Explicitly replaces any previous definition of `type` with a new one. Does *not*
 
 ### moog.isDefined(type)
 
-Returns true if the type is defined, whether explicitly or via the autoloader optional. That is, `moog.create` will succeed for `type`, provided that the constructor does not signal an error.
+Returns true if the type is defined, whether explicitly or via the autoloader option. That is, `moog.create` will succeed for `type`, provided that the constructor does not signal an error.
 
 ### moog.create(type, options, callback)
 

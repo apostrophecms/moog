@@ -48,17 +48,16 @@ describe('moog', function() {
         construct: function(){}
       });
 
-      return done();
     });
 
-    it('should be able to `define` and then `create` an instance', function() {
+    it('should be able to `define` and then `create` an instance', function(done) {
       var moog = require('../index.js')({});
 
       moog.define('myObject', {
         construct: function(){}
       });
 
-      moog.create('myObject', function(myObject) {
+      moog.create('myObject', {}, function(myObject) {
         assert(myObject);
         return done();
       });

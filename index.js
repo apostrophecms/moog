@@ -1,136 +1,180 @@
 var async, _;
 
-if (window) {
-  // Works in browser if async and _ are already global
-  async = window.async;
-  _ = window._;
-} else {
+if (module) {
   // For npm
   async = require('async');
   _ = require('lodash');
+} else {
+  // Works in browser if async and _ are already global
+  async = window.async;
+  _ = window._;
 }
 
 module.exports = function(options) {
 
   var self = {};
 
-  self.dirty = false;
-
   self.options = options;
 
   self.definitions = {};
 
   self.define = function(type, definition) {
-    self.definitions[type] = definition;
-    self.dirty = true;
-  };
-
-  _.each(options.definitions || {}, function(definition, name) {
-    self.define(name, definition);
-  });
-
-  // The default autoloader just returns the explicit definition, if any
-  self.autoloader = options.autoloader || function(self, self.options, type, definition, extendedBy) {
     if (!definition) {
-      throw new Error('The type ' + type + ' is not defined.');
+      // This can happen because we use self.define as an autoloader
+      // when resolving "extend". The moog-require module overloads
+      // self.define to handle this case
+      throw new Error(new Error('The type ' + nextType + ' is not defined.'));
+    }
+    definition.__name = type;
+    if (!definition.extend) {
+      if (_.has(self.definitions, type)) {
+        // Double definitions result in implicit subclassing of
+        // the original definition by the new one; anything else
+        // trying to access this type name will see
+        // the resulting subclass via self.definitions. However
+        // we reset the __name property for the benefit of
+        // implementations that need to distinguish assets that
+        // come from each subclass in the inheritance chain.
+        definition.extend = self.definitions[type];
+        definition.__name = 'my-' + definition.__name;
+      } else {
+        // Extend the default base class by default, if any, unless
+        // we're it
+        if (self.options.defaultBaseClass && type !== self.options.defaultBaseClass) {
+          definition.extend = self.options.defaultBaseClass;
+        }
+      }
+      self.definitions[type] = definition;
     }
     return definition;
   };
 
+  // Apply any definitions passed directly to the factory function
+  _.each(options.definitions || {}, function(definition, name) {
+    self.define(name, definition);
+  });
+
+  self.redefine = function(type, definition) {
+    delete self.definitions[type];
+    return self.define(type, definition);
+  };
+
+  self.isDefined = function(type) {
+    if (_.has(self.definitions, type)) {
+      return true;
+    }
+    try {
+      // Can we autoload it?
+      self.define(type);
+      // Yes, but we don't really want it yet
+      delete self.definitions[type];
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Create an instance
   self.create = function(type, options, callback) {
 
     var definition;
 
-    try {
-      definition = self.autoloader(type, self.definitions[type], false);
-    } catch (e) {
-      return callback(e);
-    }
-
     var that = {};
-    var next = definition;
     var steps = [];
-    var seen = {};
-
+    var next = self.definitions[type];
+    if (!next) {
+      return callback(new Error('The type ' + nextType + ' is not defined.'));
+    }
     while (next) {
-      if (_.has(seen, next.__name)) {
-        return callback(new Error('"extends" loop detected, a class is extending its subclass and vice versa: ' + name));
-      }
-      seen[next.__name] = true;
       steps.push(next);
       next = next.extend;
+      // In most cases it'll be a string we need to look up
+      // in self.definitions. In a few cases it is already
+      // a pointer to another definition (see double defines, above)
+      if (typeof(next) === 'string') {
+        var nextName = next;
+        next = self.definitions[nextName];
+        if (!next) {
+          try {
+            // Try to use define as an autoloader. This will fail in
+            // the default implementation
+            next = self.define(nextName);
+          } catch (e) {
+            return callback(e);
+          }
+        }
+      }
     }
 
-      return async.series({
-        beforeConstruct: function(callback) {
-          return async.eachSeries(steps, function(step, callback) {
-            // Apply the simple option defaults
-            _.each(step, function(val, key) {
-              if ((key === 'construct') || (key === 'extend') || (key === 'beforeConstruct')) {
-                return;
-              }
-              if (key.substr(0, 2) === '__') {
-                return;
-              }
-              if (_.has(options, key)) {
-                return;
-              }
-              options[key] = val;
-            });
+    return async.series({
+      beforeConstruct: function(callback) {
+        return async.eachSeries(steps, function(step, callback) {
+          // Apply the simple option defaults
+          _.each(step, function(val, key) {
+            if ((key === 'construct') || (key === 'extend') || (key === 'beforeConstruct')) {
+              return;
+            }
+            if (key.substr(0, 2) === '__') {
+              return;
+            }
+            if (_.has(options, key)) {
+              return;
+            }
+            options[key] = val;
+          });
 
-            // Invoke beforeConstruct, defaulting to an empty one
-            var beforeConstruct = step.beforeConstruct || function(self, options, callback) { return setImmediate(callback); };
-            // Turn sync into async
-            if (beforeConstruct.length === 2) {
-              var syncBeforeConstruct = beforeConstruct;
-              beforeConstruct = function(self, options, callback) {
-                try {
-                  syncBeforeConstruct(self, options);
-                } catch (e) {
-                  return setImmediate(_.partial(callback, e));
-                }
-                return setImmediate(callback);
-              };
-            }
-            if (beforeConstruct.length < 3) {
-              return callback(new Error('beforeConstruct must take the following arguments: "self", "options", and (if it is async) "callback"'));
-            }
+          // Invoke beforeConstruct, defaulting to an empty one
+          var beforeConstruct = step.beforeConstruct || function(self, options, callback) { return setImmediate(callback); };
+          // Turn sync into async
+          if (beforeConstruct.length === 2) {
+            var syncBeforeConstruct = beforeConstruct;
+            beforeConstruct = function(self, options, callback) {
+              try {
+                syncBeforeConstruct(self, options);
+              } catch (e) {
+                return setImmediate(_.partial(callback, e));
+              }
+              return setImmediate(callback);
+            };
+          }
+          if (beforeConstruct.length < 3) {
+            return callback(new Error('beforeConstruct must take the following arguments: "self", "options", and (if it is async) "callback"'));
+          }
 
-            return beforeConstruct(that, options, callback);
-          }, callback);
-        },
-        construct: function(callback) {
-          // Now we want to start from the base class and go down
-          steps.reverse();
-          return async.eachSeries(steps, function(step, callback) {
-            // Invoke construct, defaulting to an empty one
-            var construct = step.construct || function(self, options, callback) { return setImmediate(callback); };
+          return beforeConstruct(that, options, callback);
+        }, callback);
+      },
+      construct: function(callback) {
+        // Now we want to start from the base class and go down
+        steps.reverse();
+        return async.eachSeries(steps, function(step, callback) {
+          // Invoke construct, defaulting to an empty one
+          var construct = step.construct || function(self, options, callback) { return setImmediate(callback); };
 
-            // Turn sync into async
-            if (construct.length === 2) {
-              var syncConstruct = construct;
-              construct = function(self, options, callback) {
-                try {
-                  syncConstruct(self, options);
-                } catch (e) {
-                  return setImmediate(_.partial(callback, e));
-                }
-                return setImmediate(callback);
-              };
-            }
-            if (construct.length < 3) {
-              return callback(new Error('construct must take the following arguments: "self", "options", and (if it is async) "callback"'));
-            }
-            return construct(that, options, callback);
-          }, callback);
-        }
-      }, function(err) {
-        if (err) {
-          return callback(err);
-        }
-        return callback(null, that);
-      });
-    }
+          // Turn sync into async
+          if (construct.length === 2) {
+            var syncConstruct = construct;
+            construct = function(self, options, callback) {
+              try {
+                syncConstruct(self, options);
+              } catch (e) {
+                return setImmediate(_.partial(callback, e));
+              }
+              return setImmediate(callback);
+            };
+          }
+          if (construct.length < 3) {
+            return callback(new Error('construct must take the following arguments: "self", "options", and (if it is async) "callback"'));
+          }
+          return construct(that, options, callback);
+        }, callback);
+      }
+    }, function(err) {
+      if (err) {
+        return callback(err);
+      }
+      return callback(null, that);
+    });
   };
 
   self.createAll = function(globalOptions, specificOptions, callback) {
@@ -170,17 +214,5 @@ module.exports = function(options) {
 
   return self;
 
-  function getNpmPath(parentPath, type) {
-    if (_.has(self.bundled, type)) {
-      return self.bundled[type];
-    }
-    try {
-      return npmResolve.sync(type, { basedir: path.dirname(parentPath) });
-    } catch (e) {
-      // Not found via npm. This does not mean it doesn't
-      // exist as a project-level thing
-      return null;
-    }
-  }
 };
 
