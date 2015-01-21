@@ -27,6 +27,12 @@ describe('moog', function() {
       return done();
     });
 
+    it('should have a `bridge` method', function(done) {
+      var moog = require('../index.js')({});
+      assert(moog.bridge);
+      return done();
+    });
+
     it('should have a `isDefined` method', function(done) {
       var moog = require('../index.js')({});
       assert(moog.isDefined);
