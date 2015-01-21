@@ -1,0 +1,29 @@
+{
+  "name": "synthesizer",
+  "version": "0.0.1",
+  "description": "Synthesizer provides powerful module subclassing.",
+  "main": "index.js",
+  "dependencies": {
+    "async": "^0.9.0",
+    "lodash": "2.4.x"
+  },
+  "devDependencies": {
+    "mocha": "2.1.x"
+  },
+  "scripts": {
+    "test": "mocha test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/punkave/synthesizer"
+  },
+  "keywords": [
+    "apostrophe",
+    "subclass",
+    "subclassing",
+    "module",
+    "loader"
+  ],
+  "author": "P'unk Avenue",
+  "license": "MIT"
+}
