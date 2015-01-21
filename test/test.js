@@ -28,17 +28,17 @@ describe('synthesizer', function() {
     });
 
     it('should have a `isDefined` method', function(done) {
-      var synth = require('../index.js')({});
-      assert(synth.isDefined);
+      var moog = require('../index.js')({});
+      assert(moog.isDefined);
       return done();
     });
   });
 
   describe('basic methods', function() {
     it('should be able to `define` an instance', function() {
-      var synth = require('../index.js')({});
+      var moog = require('../index.js')({});
 
-      synth.define('myObject', {
+      moog.define('myObject', {
         construct: function(){}
       });
 
@@ -46,13 +46,13 @@ describe('synthesizer', function() {
     });
 
     it('should be able to `define` and then `create` an instance', function() {
-      var synth = require('../index.js')({});
+      var moog = require('../index.js')({});
 
-      synth.define('myObject', {
+      moog.define('myObject', {
         construct: function(){}
       });
 
-      synth.create('myObject', function(myObject) {
+      moog.create('myObject', function(myObject) {
         assert(myObject);
         return done();
       });
