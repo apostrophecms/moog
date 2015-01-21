@@ -54,13 +54,20 @@ describe('moog', function() {
       var moog = require('../index.js')({});
 
       moog.define('myObject', {
-        construct: function(){}
+        color: 'blue',
+        construct: function(self, options) {
+          self._options = options;
+        }
       });
 
-      moog.create('myObject', {}, function(myObject) {
+      moog.create('myObject', {}, function(err, myObject) {
+        assert(!err);
         assert(myObject);
+        assert(myObject._options.color === 'blue');
         return done();
       });
     });
+
+
   });
 });
