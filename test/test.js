@@ -33,4 +33,29 @@ describe('synthesizer', function() {
       return done();
     });
   });
+
+  describe('basic methods', function() {
+    it('should be able to `define` an instance', function() {
+      var synth = require('../index.js')({});
+
+      synth.define('myObject', {
+        construct: function(){}
+      });
+
+      return done();
+    });
+
+    it('should be able to `define` and then `create` an instance', function() {
+      var synth = require('../index.js')({});
+
+      synth.define('myObject', {
+        construct: function(){}
+      });
+
+      synth.create('myObject', function(myObject) {
+        assert(myObject);
+        return done();
+      });
+    });
+  });
 });
