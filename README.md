@@ -110,5 +110,3 @@ The callback receives the arguments `err, obj` where `obj` is the object created
 Creates one object of each type that has been defined via `moog.define` or via the `definitions` option given when configuring `moog`. Only types explicitly defined in this way are created, but they may extend types available via the `autoloader` option given when configuring `moog`.
 
 The options passed for each object consist of `globalOptions` extended by `specificOptions[type]`.
-=======
-A module synthesizer with subclassing.
