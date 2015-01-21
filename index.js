@@ -44,8 +44,8 @@ module.exports = function(options) {
           definition.extend = self.options.defaultBaseClass;
         }
       }
-      self.definitions[type] = definition;
     }
+    self.definitions[type] = definition;
     return definition;
   };
 
@@ -76,14 +76,13 @@ module.exports = function(options) {
 
   // Create an instance
   self.create = function(type, options, callback) {
-
     var definition;
 
     var that = {};
     var steps = [];
     var next = self.definitions[type];
     if (!next) {
-      return callback(new Error('The type ' + nextType + ' is not defined.'));
+      return callback(new Error('The type ' + type + ' is not defined.'));
     }
     while (next) {
       steps.push(next);
