@@ -25,7 +25,8 @@ module.exports = function(options) {
       // self.define to handle this case
       throw new Error(new Error('The type ' + nextType + ' is not defined.'));
     }
-    definition.__name = type;
+    definition.__meta = definition.__meta || {};
+    definition.__meta.name = type;
     if (!definition.extend) {
       if (_.has(self.definitions, type)) {
         // Double definitions result in implicit subclassing of
@@ -36,7 +37,7 @@ module.exports = function(options) {
         // implementations that need to distinguish assets that
         // come from each subclass in the inheritance chain.
         definition.extend = self.definitions[type];
-        definition.__name = 'my-' + definition.__name;
+        definition.__meta.name = 'my-' + definition.__meta.name;
       } else {
         // Extend the default base class by default, if any, unless
         // we're it
@@ -146,7 +147,11 @@ module.exports = function(options) {
       construct: function(callback) {
         // Now we want to start from the base class and go down
         steps.reverse();
+        // Also attach metadata about the modules in the
+        // inheritance chain, base class first
+        that.__meta = [];
         return async.eachSeries(steps, function(step, callback) {
+          that.__meta.push(step.__meta);
           // Invoke construct, defaulting to an empty one
           var construct = step.construct || function(self, options, callback) { return setImmediate(callback); };
 

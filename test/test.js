@@ -135,6 +135,10 @@ describe('moog', function() {
         // What we are testing is that _options got set at all
         // (see construct for baseClass)
         assert(myObject._options.color === 'red');
+        assert(myObject.__meta);
+        assert(myObject.__meta[0]);
+        assert(myObject.__meta[0].name === 'baseClass');
+        assert(myObject.__meta[1].name === 'subClass');
         return done();
       });
     });

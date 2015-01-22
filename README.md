@@ -105,6 +105,8 @@ Creates an object of the specified `type`, passing `options`, which may be modif
 
 The callback receives the arguments `err, obj` where `obj` is the object created.
 
+`obj` will always have a `__meta` property, which contains an array of metadata objects describing each module in the inheritance chain, starting with the base class. The metadata objects will always have a `name` property. [moog-require](https://github.com/punkave/moog-require) also provides `dirname` and `filename`. This is useful to implement template overrides, or push browser-side javascript and styles defined by each level.
+
 ### moog.createAll(globalOptions, specificOptions, callback)
 
 Creates one object of each type that has been defined via `moog.define` or via the `definitions` option given when configuring `moog`. Only types explicitly defined in this way are created, but they may extend types available via the `autoloader` option given when configuring `moog`.
