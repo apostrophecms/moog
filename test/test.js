@@ -27,6 +27,12 @@ describe('moog', function() {
       return done();
     });
 
+    it('should have a `createAll` method', function(done) {
+      var moog = require('../index.js')({});
+      assert(moog.createAll);
+      return done();
+    });
+
     it('should have a `bridge` method', function(done) {
       var moog = require('../index.js')({});
       assert(moog.bridge);
@@ -47,7 +53,6 @@ describe('moog', function() {
       moog.define('myObject', {
         construct: function(){}
       });
-
     });
 
     it('should be able to `define` and then `create` an instance', function(done) {
@@ -64,6 +69,25 @@ describe('moog', function() {
         assert(!err);
         assert(myObject);
         assert(myObject._options.color === 'blue');
+        return done();
+      });
+    });
+
+    it('should be able to `define` multiple instances using an object', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define({
+        'myObjectOne': {
+          construct: function(){}
+        },
+        'myObjectTwo': {
+          construct: function(){}
+        }
+      });
+
+      moog.create('myObjectOne', {}, function(err, myObject) {
+        assert(!err);
+        assert(myObject);
         return done();
       });
     });
@@ -143,6 +167,65 @@ describe('moog', function() {
       });
     });
 
+    it('should create multiple modules using `createAll`', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('objectOne', {
+        construct: function(self, options) { }
+      });
+
+      moog.define('objectTwo', {
+        construct: function(self, options) { }
+      });
+
+      moog.createAll({}, {}, function(err, modules) {
+        if (err) {
+          console.error(err);
+        }
+        assert(!err);
+        assert(modules);
+        assert(modules.objectOne);
+        assert(modules.objectTwo);
+        return done();
+      });
+    });
+
+    it('should allow modules to reference each other using `bridge`', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('objectOne', {
+        construct: function(self, options) {
+          self._options = options;
+          self.setBridge = function(modules) {
+            self._otherModule = modules.objectOne;
+          };
+        }
+      });
+
+      moog.define('objectTwo', {
+        color: 'red',
+        construct: function(self, options) {
+          self._options = options;
+          self.setBridge = function(modules) {
+            self._otherModule = modules.objectTwo;
+          };
+        }
+      });
+
+      moog.createAll({}, {}, function(err, modules) {
+        if (err) {
+          console.error(err);
+        }
+        assert(!err);
+        moog.bridge(modules);
+        assert(modules.objectOne._otherModule);
+        assert(modules.objectTwo._otherModule);
+        return done();
+      });
+    });
+  });
+
+  describe('error handling', function() {
 
   });
 });
