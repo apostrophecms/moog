@@ -1,5 +1,9 @@
 # moog
 
+[![Build Status](https://travis-ci.org/punkave/moog.svg?branch=master)](https://travis-ci.org/punkave/moog)
+
+Moog is for creating objects that can be subclassed.
+
 ```javascript
 var moog = require('moog')();
 
