@@ -19,6 +19,16 @@ module.exports = function(options) {
   self.definitions = {};
 
   self.define = function(type, definition) {
+
+    // Define many in a single call
+    if (typeof(type) === 'object') {
+      // Apply any definitions passed directly to the factory function
+      _.each(type || {}, function(definition, name) {
+        self.define(name, definition);
+      });
+      return;
+    }
+
     if (!definition) {
       // This can happen because we use self.define as an autoloader
       // when resolving "extend". The moog-require module overloads
@@ -49,11 +59,6 @@ module.exports = function(options) {
     self.definitions[type] = definition;
     return definition;
   };
-
-  // Apply any definitions passed directly to the factory function
-  _.each(options.definitions || {}, function(definition, name) {
-    self.define(name, definition);
-  });
 
   self.redefine = function(type, definition) {
     delete self.definitions[type];
