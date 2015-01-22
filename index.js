@@ -18,7 +18,10 @@ module.exports = function(options) {
 
   self.definitions = {};
 
-  self.define = function(type, definition) {
+  // The "extending" argument is of interest to subclasses like
+  // moog-require that need to know about relative paths.
+
+  self.define = function(type, definition, extending) {
 
     // Define many in a single call
     if (typeof(type) === 'object') {
@@ -91,8 +94,9 @@ module.exports = function(options) {
       return callback(new Error('The type ' + type + ' is not defined.'));
     }
     while (next) {
-      steps.push(next);
-      next = next.extend;
+      var current = next;
+      steps.push(current);
+      next = current.extend;
       // In most cases it'll be a string we need to look up
       // in self.definitions. In a few cases it is already
       // a pointer to another definition (see double defines, above)
@@ -103,7 +107,7 @@ module.exports = function(options) {
           try {
             // Try to use define as an autoloader. This will fail in
             // the default implementation
-            next = self.define(nextName);
+            next = self.define(nextName, undefined, current);
           } catch (e) {
             return callback(e);
           }
