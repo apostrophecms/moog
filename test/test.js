@@ -261,7 +261,31 @@ describe('moog', function() {
       var moog = require('../index.js')({});
 
       moog.define('baseClass', {
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('first');
+        }
+      });
 
+      moog.define('subClassOne', {
+        extend: 'baseClass',
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('second');
+        }
+      });
+
+      moog.define('subClassTwo', {
+        extend: 'subClassOne',
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('third');
+        }
+      });
+
+      moog.create('subClassTwo', {}, function(err, subClassTwo) {
+        assert(!err);
+        assert(subClassTwo._order[0] === 'first');
+        assert(subClassTwo._order[1] === 'second');
+        assert(subClassTwo._order[2] === 'third');
+        return done();
       });
     });
   });
