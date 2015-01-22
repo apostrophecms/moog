@@ -137,79 +137,121 @@
         }
       }
 
-      return async.series({
-        beforeConstruct: function(callback) {
-          return async.eachSeries(steps, function(step, callback) {
-            // Apply the simple option defaults
-            _.each(step, function(val, key) {
-              if ((key === 'construct') || (key === 'extend') || (key === 'beforeConstruct')) {
-                return;
-              }
-              if (key.substr(0, 2) === '__') {
-                return;
-              }
-              if (_.has(options, key)) {
-                return;
-              }
-              options[key] = val;
-            });
+      if (!callback) {
+        return createSync();
+      } else {
+        return createAsync();
+      }
 
-            // Invoke beforeConstruct, defaulting to an empty one
-            var beforeConstruct = step.beforeConstruct || function(self, options, callback) { return afterYield(callback); };
-            // Turn sync into async
-            if (beforeConstruct.length === 2) {
-              var syncBeforeConstruct = beforeConstruct;
-              beforeConstruct = function(self, options, callback) {
-                try {
-                  syncBeforeConstruct(self, options);
-                } catch (e) {
-                  return afterYield(_.partial(callback, e));
-                }
-                return afterYield(callback);
-              };
+      function createSync() {
+        _.each(steps, function(step) {
+          applyOptions(step);
+          if (step.beforeConstruct) {
+            if (step.beforeConstruct.length === 3) {
+              throw new Error('moog.create was called synchronously for the type ' + type + ', but the ' + step.__name + ' class has an asynchronous beforeConstruct method. You must provide a callback to create.');
             }
-            if (beforeConstruct.length < 3) {
-              return callback(new Error('beforeConstruct must take the following arguments: "self", "options", and (if it is async) "callback"'));
-            }
+            step.beforeConstruct(that, options);
+          }
+        });
 
-            return beforeConstruct(that, options, callback);
-          }, callback);
-        },
-        construct: function(callback) {
-          // Now we want to start from the base class and go down
-          steps.reverse();
-          // Also attach metadata about the modules in the
-          // inheritance chain, base class first
-          that.__meta = [];
-          return async.eachSeries(steps, function(step, callback) {
-            that.__meta.push(step.__meta);
-            // Invoke construct, defaulting to an empty one
-            var construct = step.construct || function(self, options, callback) { return afterYield(callback); };
+        // Now we want to start from the base class and go down
+        steps.reverse();
+        // Also attach metadata about the modules in the
+        // inheritance chain, base class first
+        that.__meta = [];
+        _.each(steps, function(step) {
+          that.__meta.push(step.__meta);
+          if (step.construct) {
+            if (step.construct.length === 3) {
+              throw new Error('moog.create was called synchronously for the type ' + type + ', but the ' + step.__name + ' class has an asynchronous construct method. You must provide a callback to create.');
+            }
+            step.construct(that, options);
+          }
+        });
+        return that;
+      }
 
-            // Turn sync into async
-            if (construct.length === 2) {
-              var syncConstruct = construct;
-              construct = function(self, options, callback) {
-                try {
-                  syncConstruct(self, options);
-                } catch (e) {
-                  return afterYield(_.partial(callback, e));
-                }
-                return afterYield(callback);
-              };
-            }
-            if (construct.length < 3) {
-              return callback(new Error('construct must take the following arguments: "self", "options", and (if it is async) "callback"'));
-            }
-            return construct(that, options, callback);
-          }, callback);
-        }
-      }, function(err) {
-        if (err) {
-          return callback(err);
-        }
-        return callback(null, that);
-      });
+      function createAsync() {
+        return async.series({
+          beforeConstruct: function(callback) {
+            return async.eachSeries(steps, function(step, callback) {
+
+              applyOptions(step);
+
+              // Invoke beforeConstruct, defaulting to an empty one
+              var beforeConstruct = step.beforeConstruct || function(self, options, callback) { return afterYield(callback); };
+              // Turn sync into async
+              if (beforeConstruct.length === 2) {
+                var syncBeforeConstruct = beforeConstruct;
+                beforeConstruct = function(self, options, callback) {
+                  try {
+                    syncBeforeConstruct(self, options);
+                  } catch (e) {
+                    return afterYield(_.partial(callback, e));
+                  }
+                  return afterYield(callback);
+                };
+              }
+              if (beforeConstruct.length < 3) {
+                return callback(new Error('beforeConstruct must take the following arguments: "self", "options", and (if it is async) "callback"'));
+              }
+
+              return beforeConstruct(that, options, callback);
+            }, callback);
+          },
+          construct: function(callback) {
+            // Now we want to start from the base class and go down
+            steps.reverse();
+            // Also attach metadata about the modules in the
+            // inheritance chain, base class first
+            that.__meta = [];
+            return async.eachSeries(steps, function(step, callback) {
+              that.__meta.push(step.__meta);
+              // Invoke construct, defaulting to an empty one
+              var construct = step.construct || function(self, options, callback) { return afterYield(callback); };
+
+              // Turn sync into async
+              if (construct.length === 2) {
+                var syncConstruct = construct;
+                construct = function(self, options, callback) {
+                  try {
+                    syncConstruct(self, options);
+                  } catch (e) {
+                    return afterYield(_.partial(callback, e));
+                  }
+                  return afterYield(callback);
+                };
+              }
+              if (construct.length < 3) {
+                return callback(new Error('construct must take the following arguments: "self", "options", and (if it is async) "callback"'));
+              }
+              return construct(that, options, callback);
+            }, callback);
+          }
+        }, function(err) {
+          if (err) {
+            return callback(err);
+          }
+          return callback(null, that);
+        });
+      }
+
+      function applyOptions(step) {
+        // Apply the simple option defaults
+        _.each(step, function(val, key) {
+          if ((key === 'construct') || (key === 'extend') || (key === 'beforeConstruct')) {
+            return;
+          }
+          if (key.substr(0, 2) === '__') {
+            return;
+          }
+          if (_.has(options, key)) {
+            return;
+          }
+          options[key] = val;
+        });
+      }
+
     };
 
     self.createAll = function(globalOptions, specificOptions, callback) {
@@ -218,29 +260,52 @@
       var explicit = _.filter(defined, function(type) {
         return self.definitions[type].__meta.explicit = true;
       });
-      return async.eachSeries(
-        explicit,
-        function(name, callback) {
-          var options = {};
-          _.extend(options, globalOptions);
-          if (_.has(specificOptions, name)) {
-            _.extend(options, specificOptions[name]);
-          }
-          return self.create(name, options, function(err, obj) {
+
+      if (callback) {
+        return createAllAsync();
+      } else {
+        return createAllSync();
+      }
+
+      function createAllAsync() {
+        return async.eachSeries(
+          explicit,
+          function(name, callback) {
+            var options = applyOptions(name);
+            return self.create(name, options, function(err, obj) {
+              if (err) {
+                return callback(err);
+              }
+              result[name] = obj;
+              return callback(null);
+            });
+          },
+          function(err) {
             if (err) {
               return callback(err);
             }
-            result[name] = obj;
-            return callback(null);
-          });
-        },
-        function(err) {
-          if (err) {
-            return callback(err);
+            return callback(null, result);
           }
-          return callback(null, result);
+        );
+      }
+
+      function createAllSync() {
+        var result = {};
+        _.each(explicit, function(name) {
+          var options = applyOptions(name);
+          result[name] = self.create(name, options);
+        });
+        return result;
+      }
+
+      function applyOptions(name) {
+        var options = {};
+        _.extend(options, globalOptions);
+        if (_.has(specificOptions, name)) {
+          _.extend(options, specificOptions[name]);
         }
-      );
+        return options;
+      }
     };
 
     self.bridge = function(modules) {

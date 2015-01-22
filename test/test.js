@@ -118,6 +118,24 @@ describe('moog', function() {
       });
     });
 
+    it('should create multiple modules using `createAll` synchronously', function() {
+      var moog = require('../index.js')({});
+
+      moog.define('objectOne', {
+        construct: function(self, options) { }
+      });
+
+      moog.define('objectTwo', {
+        construct: function(self, options) { }
+      });
+
+      var modules = moog.createAll({}, {});
+
+      assert(modules);
+      assert(modules.objectOne);
+      assert(modules.objectTwo);
+    });
+
   });
 
   describe('explicit subclassing behavior', function() {
@@ -610,5 +628,82 @@ describe('moog', function() {
       });
     });
 
+    it('should allow synchronous creation of a class with no asynchronous beforeConstruct or construct methods', function() {
+      var moog = require('../index.js')({});
+
+      moog.define('baseclass', {
+        color: 'blue',
+        construct: function(self, options) {
+          self._options = options;
+        }
+      });
+
+      moog.define('subclass', {
+        color: 'red',
+        beforeConstruct: function(self, options) {
+          options.color = 'purple';
+        },
+        extend: 'baseclass'
+      });
+
+      var obj = moog.create('subclass', {});
+      assert(obj._options.color === 'purple');
+    });
+
+    it('should not allow synchronous creation of a class with asynchronous construct methods', function() {
+      var moog = require('../index.js')({});
+
+      moog.define('baseclass', {
+        color: 'blue',
+        construct: function(self, options, callback) {
+          self._options = options;
+          return setImmediate(callback);
+        }
+      });
+
+      moog.define('subclass', {
+        color: 'red',
+        beforeConstruct: function(self, options) {
+          options.color = 'purple';
+        },
+        extend: 'baseclass'
+      });
+
+      var errorReported = false;
+      try {
+        var obj = moog.create('subclass', {});
+      } catch (e) {
+        errorReported = true;
+      }
+      assert(errorReported);
+    });
+
+    it('should not allow synchronous creation of a class with asynchronous beforeConstruct methods', function() {
+      var moog = require('../index.js')({});
+
+      moog.define('baseclass', {
+        color: 'blue',
+        construct: function(self, options) {
+          self._options = options;
+        }
+      });
+
+      moog.define('subclass', {
+        color: 'red',
+        beforeConstruct: function(self, options, callback) {
+          options.color = 'purple';
+          return setImmediate(callback);
+        },
+        extend: 'baseclass'
+      });
+
+      var errorReported = false;
+      try {
+        var obj = moog.create('subclass', {});
+      } catch (e) {
+        errorReported = true;
+      }
+      assert(errorReported);
+    });
   });
 });

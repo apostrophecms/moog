@@ -110,19 +110,21 @@ Explicitly replaces any previous definition of `type` with a new one. Does *not*
 
 Returns true if the type is defined, whether explicitly or via the autoloader option. That is, `moog.create` will succeed for `type`, provided that the constructor does not signal an error.
 
-### moog.create(type, options, callback)
+### moog.create(type, options, /* callback */)
 
 Creates an object of the specified `type`, passing `options`, which may be modified first by the default option values given in type definitions beginning with the deepest subclass, then by any `beforeConstruct` methods present, which are called for the deepest subclass first. Then the `construct` methods are called, if present, starting with the base class and ending with the final subclass.
 
-The callback receives the arguments `err, obj` where `obj` is the object created.
+If a callback is given, the callback receives the arguments `err, obj` where `obj` is the object created. If a callback is not given, an exception is thrown in the event of an error, otherwise the object is returned. **There must not be any asynchronous beforeConstruct or construct methods if you create the object synchronously.** `moog` will throw an exception in that situation.
 
 `obj` will always have a `__meta` property, which contains an array of metadata objects describing each module in the inheritance chain, starting with the base class. The metadata objects will always have a `name` property. [moog-require](https://github.com/punkave/moog-require) also provides `dirname` and `filename`. This is useful to implement template overrides, or push browser-side javascript and styles defined by each level.
 
-### moog.createAll(globalOptions, specificOptions, callback)
+### moog.createAll(globalOptions, specificOptions, /* callback */)
 
 Creates one object of each type that has been defined via `moog.define` or via the `definitions` option given when configuring `moog`. Only types explicitly defined in this way are created, but they may extend types available via the `autoloader` option given when configuring `moog`.
 
 The options passed for each object consist of `globalOptions` extended by `specificOptions[type]`.
+
+If you pass a callback, it will receive an error and, if no error, an object with a property for each type name. If you do not pass a callback, such an object is returned directly. **If you do not pass a callback, then you must not define any types that have asynchronous `construct` and `beforeConstruct` methods.**
 
 ## Using moog in the browser
 
