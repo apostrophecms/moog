@@ -384,5 +384,57 @@ describe('moog', function() {
         return done();
       });
     });
+
+    it('should extend an async `beforeConstruct` method with a sync version', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('baseClass', {
+        beforeConstruct: function(self, options, callback) {
+          self._order = (self._order || []).concat('second');
+          return setImmediate(callback);
+        }
+      });
+
+      moog.define('subClass', {
+        extend: 'baseClass',
+        beforeConstruct: function(self, options) {
+          self._order = (self._order || []).concat('first');
+        }
+      });
+
+      moog.create('subClass', {}, function(err, subClass) {
+        assert(!err);
+        assert(subClass);
+        assert(subClass._order[0] === 'first');
+        assert(subClass._order[1] === 'second');
+        return done();
+      });
+    });
+
+    it('should extend a sync `beforeConstruct` method with an async version', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('baseClass', {
+        beforeConstruct: function(self, options) {
+          self._order = (self._order || []).concat('second');
+        }
+      });
+
+      moog.define('subClass', {
+        extend: 'baseClass',
+        beforeConstruct: function(self, options, callback) {
+          self._order = (self._order || []).concat('first');
+          return setImmediate(callback);
+        }
+      });
+
+      moog.create('subClass', {}, function(err, subClass) {
+        assert(!err);
+        assert(subClass);
+        assert(subClass._order[0] === 'first');
+        assert(subClass._order[1] === 'second');
+        return done();
+      });
+    });
   });
 });
