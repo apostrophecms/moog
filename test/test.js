@@ -275,7 +275,7 @@ describe('moog', function() {
         }
       });
 
-      moog.create('myObject', function(err, myObject) {
+      moog.create('myObject', {}, function(err, myObject) {
         assert(!err);
         assert(myObject);
 
