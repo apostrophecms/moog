@@ -540,5 +540,24 @@ describe('moog', function() {
     });
 
     // cyclical references
+
+    it('should handle a sync error in `construct`', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('classOne', {
+        extend: 'classTwo'
+      });
+
+      moog.define('classTwo', {
+        extend: 'classOne'
+      });
+
+      moog.create('classOne', {}, function(err, classOne) {
+        assert(err);
+        assert(!classOne);
+        return done();
+      });
+    });
+
   });
 });
