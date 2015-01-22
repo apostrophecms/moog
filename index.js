@@ -27,6 +27,8 @@
 
     self.definitions = {};
 
+    self.ordinal = 0;
+
     // The "extending" argument is of interest to subclasses like
     // moog-require that need to know about relative paths. Must
     // return the new definition for the convenience of moog-require too
@@ -49,6 +51,7 @@
       }
       definition.__meta = definition.__meta || {};
       definition.__meta.name = type;
+      definition.__meta.ordinal = self.ordinal++;
 
       if (!extending) {
         definition.__meta.explicit = true;
@@ -103,12 +106,17 @@
 
       var that = {};
       var steps = [];
+      var seen = {};
       var next = self.definitions[type];
       if (!next) {
         return callback(new Error('The type ' + type + ' is not defined.'));
       }
       while (next) {
         var current = next;
+        if (_.has(seen, current.__meta.ordinal)) {
+          return callback(new Error('The type ' + type + ' encounters an infinite loop, "extend" probably points back to itself or its subclass.'));
+        }
+        seen[current.__meta.ordinal] = true;
         steps.push(current);
         next = current.extend;
         // In most cases it'll be a string we need to look up

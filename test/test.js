@@ -592,7 +592,7 @@ describe('moog', function() {
 
     // cyclical references
 
-    it('should handle a sync error in `construct`', function(done) {
+    it('should report an error on a cyclical reference (extend in a loop)', function(done) {
       var moog = require('../index.js')({});
 
       moog.define('classOne', {
