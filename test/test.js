@@ -464,4 +464,81 @@ describe('moog', function() {
       });
     });
   });
+
+  describe('error handling', function() {
+
+    // construct
+
+    it('should handle an async error in `construct`', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('failingClass', {
+        construct: function(self, options, callback) {
+          return callback(new Error('fail'));
+        }
+      });
+
+      moog.create('failingClass', {}, function(err, failingClass) {
+        assert(err);
+        assert(err.message === 'fail');
+        assert(!failingClass);
+        return done();
+      });
+    });
+
+    it('should handle a sync error in `construct`', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('failingClass', {
+        construct: function(self, options) {
+          throw new Error('fail');
+        }
+      });
+
+      moog.create('failingClass', {}, function(err, failingClass) {
+        assert(err);
+        assert(err.message === 'fail');
+        assert(!failingClass);
+        return done();
+      });
+    });
+
+    // beforeConstruct
+
+    it('should handle an async error in `beforeConstruct`', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('failingClass', {
+        beforeConstruct: function(self, options, callback) {
+          return callback(new Error('fail'));
+        }
+      });
+
+      moog.create('failingClass', {}, function(err, failingClass) {
+        assert(err);
+        assert(err.message === 'fail');
+        assert(!failingClass);
+        return done();
+      });
+    });
+
+    it('should handle a sync error in `construct`', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('failingClass', {
+        beforeConstruct: function(self, options) {
+          throw new Error('fail');
+        }
+      });
+
+      moog.create('failingClass', {}, function(err, failingClass) {
+        assert(err);
+        assert(err.message === 'fail');
+        assert(!failingClass);
+        return done();
+      });
+    });
+
+    // cyclical references
+  });
 });
