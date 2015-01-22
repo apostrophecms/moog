@@ -259,6 +259,33 @@ describe('moog', function() {
     });
   });
 
+  describe('implicit subclassing behavior', function() {
+    it('should allow a class defined twice to be implicitly subclassed', function(done){
+      var moog = require('../index.js')({});
+
+      moog.define('myObject', {
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('first');
+        }
+      });
+
+      moog.define('myObject', {
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('second');
+        }
+      });
+
+      moog.create('myObject', function(err, myObject) {
+        assert(!err);
+        assert(myObject);
+
+        assert(myObject._order[0] === 'first');
+        assert(myObject._order[1] === 'second');
+        return done();
+      });
+    });
+  });
+
   describe('order of operations', function() {
 
     // ==================================================
