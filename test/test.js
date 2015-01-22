@@ -95,6 +95,33 @@ describe('moog', function() {
       });
     });
 
+    it('should create multiple modules using `createAll`', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('objectOne', {
+        construct: function(self, options) { }
+      });
+
+      moog.define('objectTwo', {
+        construct: function(self, options) { }
+      });
+
+      moog.createAll({}, {}, function(err, modules) {
+        if (err) {
+          console.error(err);
+        }
+        assert(!err);
+        assert(modules);
+        assert(modules.objectOne);
+        assert(modules.objectTwo);
+        return done();
+      });
+    });
+
+  });
+
+  describe('explicit subclassing behavior', function() {
+
     it('should be able to override a default option value at create time', function(done) {
       var moog = require('../index.js')({});
 
@@ -201,29 +228,6 @@ describe('moog', function() {
       });
     });
 
-    it('should create multiple modules using `createAll`', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('objectOne', {
-        construct: function(self, options) { }
-      });
-
-      moog.define('objectTwo', {
-        construct: function(self, options) { }
-      });
-
-      moog.createAll({}, {}, function(err, modules) {
-        if (err) {
-          console.error(err);
-        }
-        assert(!err);
-        assert(modules);
-        assert(modules.objectOne);
-        assert(modules.objectTwo);
-        return done();
-      });
-    });
-
     it('should allow modules to reference each other using `bridge`', function(done) {
       var moog = require('../index.js')({});
 
@@ -257,6 +261,53 @@ describe('moog', function() {
         return done();
       });
     });
+
+    // ==================================================
+    // `redefine` AND `isDefined`
+    // ==================================================
+
+    it('should allow a module to be redefined', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('myObject', {
+        construct: function(self, options) {
+          self._oldProperty = true;
+        }
+      });
+
+      moog.redefine('myObject', {
+        construct: function(self, options) {
+          self._newProperty = true;
+        }
+      });
+
+      moog.create('myObject', {}, function(err, myObject) {
+        assert(!err);
+        assert(myObject);
+        assert(!myObject._oldProperty);
+        assert(myObject._newProperty);
+        return done();
+      });
+    });
+
+    it('should find a module definition using `isDefined`', function() {
+      var moog = require('../index.js')({});
+
+      moog.define('myObject', {
+        construct: function(self, options) {
+          self._oldProperty = true;
+        }
+      });
+
+      assert(moog.isDefined('myObject'));
+    });
+
+    it('should NOT find a non-existant module definition using `isDefined`', function() {
+      var moog = require('../index.js')({});
+
+      assert(!moog.isDefined('myObject'));
+    });
+
   });
 
   describe('implicit subclassing behavior', function() {
