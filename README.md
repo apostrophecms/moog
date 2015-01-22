@@ -1,5 +1,7 @@
 # moog
 
+[![Build Status](https://travis-ci.org/punkave/moog.svg?branch=master)](https://travis-ci.org/punkave/moog)
+
 ```javascript
 var moog = require('moog')();
 
