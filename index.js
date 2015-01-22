@@ -19,10 +19,10 @@ module.exports = function(options) {
   self.definitions = {};
 
   // The "extending" argument is of interest to subclasses like
-  // moog-require that need to know about relative paths.
+  // moog-require that need to know about relative paths. Must
+  // return the new definition for the convenience of moog-require too
 
   self.define = function(type, definition, extending) {
-
     // Define many in a single call
     if (typeof(type) === 'object') {
       // Apply any definitions passed directly to the factory function
@@ -36,7 +36,7 @@ module.exports = function(options) {
       // This can happen because we use self.define as an autoloader
       // when resolving "extend". The moog-require module overloads
       // self.define to handle this case
-      throw new Error(new Error('The type ' + nextType + ' is not defined.'));
+      throw new Error(new Error('The type ' + type + ' is not defined.'));
     }
     definition.__meta = definition.__meta || {};
     definition.__meta.name = type;
