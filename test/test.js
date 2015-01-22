@@ -46,7 +46,7 @@ describe('moog', function() {
     });
   });
 
-  describe('basic methods', function() {
+  describe('defining and creating', function() {
     it('should be able to `define` an instance', function() {
       var moog = require('../index.js')({});
 
@@ -78,10 +78,10 @@ describe('moog', function() {
 
       moog.define({
         'myObjectOne': {
-          construct: function(){}
+          construct: function(self, options){}
         },
         'myObjectTwo': {
-          construct: function(){}
+          construct: function(self, options){}
         }
       });
 
@@ -135,6 +135,37 @@ describe('moog', function() {
         assert(!err);
         assert(myObject);
         assert(myObject._options.color === 'red');
+        return done();
+      });
+    });
+
+    it('should be able to `extend` a subclass into yet another subclass', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('baseClass', {
+        color: 'blue',
+        construct: function(self, options) {
+          self._options = options;
+        }
+      });
+
+      moog.define('subClassOne', {
+        color: 'red',
+        extend: 'baseClass'
+      });
+
+      moog.define('subClassTwo', {
+        color: 'green',
+        extend: 'subClassOne'
+      });
+
+      moog.create('subClassTwo', {}, function(err, myObject) {
+        if (err) {
+          console.error(err);
+        }
+        assert(!err);
+        assert(myObject);
+        assert(myObject._options.color === 'green');
         return done();
       });
     });
@@ -228,7 +259,13 @@ describe('moog', function() {
     });
   });
 
-  describe('error handling', function() {
+  describe('order of operations', function() {
+    it('should call `construct` methods baseClass-first', function(done) {
+      var moog = require('../index.js')({});
 
+      moog.define('baseClass', {
+
+      });
+    });
   });
 });
