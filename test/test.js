@@ -73,7 +73,7 @@ describe('moog', function() {
       });
     });
 
-    it('should be able to `define` multiple instances using an object', function(done) {
+    it('should be able to `define` multiple types using an object', function(done) {
       var moog = require('../index.js')({});
 
       moog.define({
@@ -86,6 +86,9 @@ describe('moog', function() {
       });
 
       moog.create('myObjectOne', {}, function(err, myObject) {
+        if (err) {
+          console.error(err);
+        }
         assert(!err);
         assert(myObject);
         return done();
