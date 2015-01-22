@@ -260,6 +260,11 @@ describe('moog', function() {
   });
 
   describe('order of operations', function() {
+
+    // ==================================================
+    // ORDERING
+    // ==================================================
+
     it('should call `construct` methods baseClass-first', function(done) {
       var moog = require('../index.js')({});
 
@@ -288,6 +293,94 @@ describe('moog', function() {
         assert(subClassTwo._order[0] === 'first');
         assert(subClassTwo._order[1] === 'second');
         assert(subClassTwo._order[2] === 'third');
+        return done();
+      });
+    });
+
+    it('should call `beforeConstruct` methods subClass-first', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('baseClass', {
+        beforeConstruct: function(self, options) {
+          self._order = (self._order || []).concat('third');
+        }
+      });
+
+      moog.define('subClassOne', {
+        extend: 'baseClass',
+        beforeConstruct: function(self, options) {
+          self._order = (self._order || []).concat('second');
+        }
+      });
+
+      moog.define('subClassTwo', {
+        extend: 'subClassOne',
+        beforeConstruct: function(self, options) {
+          self._order = (self._order || []).concat('first');
+        }
+      });
+
+      moog.create('subClassTwo', {}, function(err, subClassTwo) {
+        assert(!err);
+        assert(subClassTwo._order[0] === 'first');
+        assert(subClassTwo._order[1] === 'second');
+        assert(subClassTwo._order[2] === 'third');
+        return done();
+      });
+    });
+
+    // ==================================================
+    // SYNC AND ASYNC PLAYING NICELY
+    // ==================================================
+
+    it('should extend an async `construct` method with a sync version', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('baseClass', {
+        construct: function(self, options, callback) {
+          self._order = (self._order || []).concat('first');
+          return setImmediate(callback);
+        }
+      });
+
+      moog.define('subClass', {
+        extend: 'baseClass',
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('second');
+        }
+      });
+
+      moog.create('subClass', {}, function(err, subClass) {
+        assert(!err);
+        assert(subClass);
+        assert(subClass._order[0] === 'first');
+        assert(subClass._order[1] === 'second');
+        return done();
+      });
+    });
+
+    it('should extend a sync `construct` method with an async version', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('baseClass', {
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('first');
+        }
+      });
+
+      moog.define('subClass', {
+        extend: 'baseClass',
+        construct: function(self, options, callback) {
+          self._order = (self._order || []).concat('second');
+          return setImmediate(callback);
+        }
+      });
+
+      moog.create('subClass', {}, function(err, subClass) {
+        assert(!err);
+        assert(subClass);
+        assert(subClass._order[0] === 'first');
+        assert(subClass._order[1] === 'second');
         return done();
       });
     });
