@@ -144,30 +144,41 @@ describe('moog', function() {
 
   });
 
-  describe('`create` syntax', function() {
-    it('should work without options or a callback', function() {
+  describe('`create` and `createAll` syntax', function() {
+    it('should `create` without options or a callback', function() {
       var moog = require('../index.js')();
 
       moog.define('myClass', {
         construct: function(self, options) { }
       });
 
-      myClass = moog.create('myClass');
+      var myClass = moog.create('myClass');
       assert(myClass);
     });
 
-    it('should work without options', function(done) {
+    it('should `create` without options', function(done) {
       var moog = require('../index.js')();
 
       moog.define('myClass', {
         construct: function(self, options) { }
       });
 
-      myClass = moog.create('myClass', function(err, myClass) {
+      moog.create('myClass', function(err, myClass) {
         assert(!err);
         assert(myClass);
         return done();
       });
+    });
+
+    it('should `create` without a callback', function() {
+      var moog = require('../index.js')();
+
+      moog.define('myClass', {
+        construct: function(self, options) { }
+      });
+
+      var myClass = moog.create('myClass', {});
+      assert(myClass);
     });
   });
 
