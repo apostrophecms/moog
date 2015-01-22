@@ -21,6 +21,8 @@
 
   function moog(options) {
 
+    options = options || {};
+
     var self = {};
 
     self.options = options;
@@ -102,6 +104,19 @@
 
     // Create an instance
     self.create = function(type, options, callback) {
+
+      // Careful, allow skipping the options argument and also
+      // invoking synchronously with no callback in any combination
+      if (arguments.length === 1) {
+        options = {};
+      } else if (arguments.length === 2) {
+        if (typeof(arguments[1]) === 'function') {
+          callback = arguments[1];
+          options = {};
+        }
+      }
+      options = options || {};
+
       var definition;
 
       var that = {};
