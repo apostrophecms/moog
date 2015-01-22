@@ -53,7 +53,6 @@ describe('moog', function() {
       moog.define('myObject', {
         construct: function(){}
       });
-
     });
 
     it('should be able to `define` and then `create` an instance', function(done) {
@@ -70,6 +69,25 @@ describe('moog', function() {
         assert(!err);
         assert(myObject);
         assert(myObject._options.color === 'blue');
+        return done();
+      });
+    });
+
+    it('should be able to `define` multiple instances using an object', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define({
+        'myObjectOne': {
+          construct: function(){}
+        },
+        'myObjectTwo': {
+          construct: function(){}
+        }
+      });
+
+      moog.create('myObjectOne', {}, function(err, myObject) {
+        assert(!err);
+        assert(myObject);
         return done();
       });
     });
@@ -207,7 +225,7 @@ describe('moog', function() {
     });
   });
 
-  describe('methods', function() {
+  describe('error handling', function() {
 
   });
 });
