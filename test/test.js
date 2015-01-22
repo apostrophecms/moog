@@ -8,6 +8,12 @@ describe('moog', function() {
     return done();
   });
 
+  it('should be initialized without arguments', function(done) {
+    var moog = require('../index.js')();
+    assert(moog);
+    return done();
+  });
+
   describe('methods', function() {
     it('should have a `define` method', function(done) {
       var moog = require('../index.js')({});
@@ -136,6 +142,33 @@ describe('moog', function() {
       assert(modules.objectTwo);
     });
 
+  });
+
+  describe('`create` syntax', function() {
+    it('should work without options or a callback', function() {
+      var moog = require('../index.js')();
+
+      moog.define('myClass', {
+        construct: function(self, options) { }
+      });
+
+      myClass = moog.create('myClass');
+      assert(myClass);
+    });
+
+    it('should work without options', function(done) {
+      var moog = require('../index.js')();
+
+      moog.define('myClass', {
+        construct: function(self, options) { }
+      });
+
+      myClass = moog.create('myClass', function(err, myClass) {
+        assert(!err);
+        assert(myClass);
+        return done();
+      });
+    });
   });
 
   describe('explicit subclassing behavior', function() {
