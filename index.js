@@ -40,6 +40,11 @@ module.exports = function(options) {
     }
     definition.__meta = definition.__meta || {};
     definition.__meta.name = type;
+
+    if (!extending) {
+      definition.__meta.explicit = true;
+    }
+
     if (!definition.extend) {
       if (_.has(self.definitions, type)) {
         // Double definitions result in implicit subclassing of
@@ -192,8 +197,12 @@ module.exports = function(options) {
 
   self.createAll = function(globalOptions, specificOptions, callback) {
     var result = {};
+    var defined = _.keys(self.definitions);
+    var explicit = _.filter(defined, function(type) {
+      return self.definitions[type].__meta.explicit = true;
+    });
     return async.eachSeries(
-      _.keys(options.definitions),
+      explicit,
       function(name, callback) {
         var options = {};
         _.extend(options, globalOptions);
