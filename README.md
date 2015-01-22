@@ -49,16 +49,7 @@ You may also pass options:
 
 ```javascript
 var moog = require('moog')({
-  defaultBaseClass: 'superclass',
-  definitions: {
-    // This is equivalent to calling moog.define for each of these types
-    'baseclass': {
-      // see `moog.define` for example
-    },
-    'subclass': {
-      // see `moog.define` for example
-    }
-  }
+  defaultBaseClass: 'superclass'
 });
 ```
 
@@ -77,7 +68,7 @@ moog.define('baseclass', {
 });
 ```
 
-`construct` may optionally take a callback as a third argument.
+`construct` is invoked by `create` at a specific time, see below. `beforeConstruct` and `extend` are also specialized as described below. All other properties are treated as defaults for the `options` object provided when constructing an instance of the type.
 
 To subclass another type, just `extend` it by name in the definition of your subclass:
 
@@ -90,6 +81,22 @@ moog.define('subclass', {
 ```
 
 **If you define the same class twice** without setting `extend` the second time, an *implicit subclass* is created. The new version subclasses the old one, effectively "patching" it with new options and behavior without having to redefine everything. All other types that subclass that name now subclass the new version.
+
+#### Defining many types at once
+
+For convenience, you may pass an object containing properties that define many different types:
+
+```javascript
+moog.define({
+  // This is equivalent to calling moog.define for each of these types
+  'baseclass': {
+    // See above for example of a definition
+  },
+  'subclass': {
+    // See above for example of a definition
+  }
+});
+```
 
 ### moog.redefine(type, definition)
 
