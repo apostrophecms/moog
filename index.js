@@ -171,12 +171,15 @@
 
         // Now we want to start from the base class and go down
         steps.reverse();
+
         // Also attach metadata about the modules in the
         // inheritance chain, base class first
-        that.__meta = [];
+        that.__meta = { chain: [], name: type };
+
         _.each(steps, function(step) {
-          that.__meta.push(step.__meta);
+          that.__meta.chain.push(step.__meta);
         });
+
         _.each(steps, function(step) {
           if (step.construct) {
             if (step.construct.length === 3) {
@@ -219,12 +222,13 @@
           construct: function(callback) {
             // Now we want to start from the base class and go down
             steps.reverse();
+
             // Also attach metadata about the modules in the
             // inheritance chain, base class first
-            that.__meta = [];
+            that.__meta = { chain: [], name: type };
 
             _.each(steps, function(step) {
-              that.__meta.push(step.__meta);
+              that.__meta.chain.push(step.__meta);
             });
 
             return async.eachSeries(steps, function(step, callback) {
