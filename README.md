@@ -129,3 +129,7 @@ If you pass a callback, it will receive an error and, if no error, an object wit
 ## Using moog in the browser
 
 `moog` works in the browser, provided that `async` and `lodash` are already global in the browser. `moog` defines itself as `window.moog`. Currently it is not set up for use with browserify but this would be trivial to arrange.
+
+## Changelog
+
+0.1.0: bc break: `__meta` is now an object with `chain` and `name` properties. `chain` is the array of subclass metadata objects as before. `name` is the class name being instantiated. Also, `__meta` is fully populated before any constructors are called.

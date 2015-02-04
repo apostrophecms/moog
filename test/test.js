@@ -264,6 +264,12 @@ describe('moog', function() {
 
       moog.define('baseClass', {
         construct: function(self, options) {
+          // Moving these asserts here tests that meta is available
+          // in its entirety even in base class constructor. -Tom
+          assert(self.__meta);
+          assert(self.__meta[0]);
+          assert(self.__meta[0].name === 'baseClass');
+          assert(self.__meta[1].name === 'subClass');
           self._options = options;
         }
       });
@@ -282,10 +288,6 @@ describe('moog', function() {
         // What we are testing is that _options got set at all
         // (see construct for baseClass)
         assert(myObject._options.color === 'red');
-        assert(myObject.__meta);
-        assert(myObject.__meta[0]);
-        assert(myObject.__meta[0].name === 'baseClass');
-        assert(myObject.__meta[1].name === 'subClass');
         return done();
       });
     });
@@ -478,6 +480,13 @@ describe('moog', function() {
 
       moog.define('baseClass', {
         construct: function(self, options, callback) {
+          // Base class constructor can see complete metadata in an
+          // async environment. -Tom
+          assert(self.__meta);
+          assert(self.__meta[0]);
+          assert(self.__meta[0].name === 'baseClass');
+          assert(self.__meta[1].name === 'subClass');
+
           self._order = (self._order || []).concat('first');
           return setImmediate(callback);
         }

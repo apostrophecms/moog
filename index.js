@@ -176,6 +176,8 @@
         that.__meta = [];
         _.each(steps, function(step) {
           that.__meta.push(step.__meta);
+        });
+        _.each(steps, function(step) {
           if (step.construct) {
             if (step.construct.length === 3) {
               throw new Error('moog.create was called synchronously for the type ' + type + ', but the ' + step.__name + ' class has an asynchronous construct method. You must provide a callback to create.');
@@ -220,8 +222,12 @@
             // Also attach metadata about the modules in the
             // inheritance chain, base class first
             that.__meta = [];
-            return async.eachSeries(steps, function(step, callback) {
+
+            _.each(steps, function(step) {
               that.__meta.push(step.__meta);
+            });
+
+            return async.eachSeries(steps, function(step, callback) {
               // Invoke construct, defaulting to an empty one
               var construct = step.construct || function(self, options, callback) { return afterYield(callback); };
 
