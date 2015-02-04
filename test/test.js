@@ -266,10 +266,10 @@ describe('moog', function() {
         construct: function(self, options) {
           // Moving these asserts here tests that meta is available
           // in its entirety even in base class constructor. -Tom
-          assert(self.__meta);
-          assert(self.__meta[0]);
-          assert(self.__meta[0].name === 'baseClass');
-          assert(self.__meta[1].name === 'subClass');
+          assert(self.__meta.chain);
+          assert(self.__meta.chain[0]);
+          assert(self.__meta.chain[0].name === 'baseClass');
+          assert(self.__meta.chain[1].name === 'subClass');
           self._options = options;
         }
       });
@@ -481,11 +481,11 @@ describe('moog', function() {
       moog.define('baseClass', {
         construct: function(self, options, callback) {
           // Base class constructor can see complete metadata in an
-          // async environment. -Tom
-          assert(self.__meta);
-          assert(self.__meta[0]);
-          assert(self.__meta[0].name === 'baseClass');
-          assert(self.__meta[1].name === 'subClass');
+          // async environment. -Tom`
+          assert(self.__meta.chain);
+          assert(self.__meta.chain[0]);
+          assert(self.__meta.chain[0].name === 'baseClass');
+          assert(self.__meta.chain[1].name === 'subClass');
 
           self._order = (self._order || []).concat('first');
           return setImmediate(callback);
