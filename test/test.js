@@ -664,6 +664,56 @@ describe('moog', function() {
       });
     });
 
+    // beforeConstruct
+
+    it('should invoke afterConstruct with a mixture of sync and async', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('baseClass', {
+        construct: function(self, options) {
+          self.monkeys = 3;
+        },
+        afterConstruct: function(self, callback) {
+          self.monkeys = 5;
+          return callback(null);
+        }
+      });
+
+      moog.define('subClass', {
+        extend: 'baseClass',
+        construct: function(self, options) {
+          self.monkeys = 4;
+        },
+        afterConstruct: function(self) {
+          self.monkeys = 7;
+        }
+      });
+
+      moog.create('subClass', {}, function(err, item) {
+        assert(!err);
+        assert(item);
+        assert(item.monkeys === 7);
+        return done();
+      });
+    });
+
+    it('should handle a sync error in `construct`', function(done) {
+      var moog = require('../index.js')({});
+
+      moog.define('failingClass', {
+        beforeConstruct: function(self, options) {
+          throw new Error('fail');
+        }
+      });
+
+      moog.create('failingClass', {}, function(err, failingClass) {
+        assert(err);
+        assert(err.message === 'fail');
+        assert(!failingClass);
+        return done();
+      });
+    });
+
     // cyclical references
 
     it('should report an error on a cyclical reference (extend in a loop)', function(done) {

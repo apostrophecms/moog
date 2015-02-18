@@ -112,7 +112,7 @@ Returns true if the type is defined, whether explicitly or via the autoloader op
 
 ### moog.create(type, options, /* callback */)
 
-Creates an object of the specified `type`, passing `options`, which may be modified first by the default option values given in type definitions beginning with the deepest subclass, then by any `beforeConstruct` methods present, which are called for the deepest subclass first. Then the `construct` methods are called, if present, starting with the base class and ending with the final subclass.
+Creates an object of the specified `type`, passing `options`, which may be modified first by the default option values given in type definitions beginning with the deepest subclass, then by any `beforeConstruct` methods present, which are called for the deepest subclass first. Then the `construct` methods are called, if present, starting with the base class and ending with the final subclass. Finally the `afterConstruct` methods are called, if present, starting with the base class and ending with the final subclass.
 
 If a callback is given, the callback receives the arguments `err, obj` where `obj` is the object created. If a callback is not given, an exception is thrown in the event of an error, otherwise the object is returned. **There must not be any asynchronous beforeConstruct or construct methods if you create the object synchronously.** `moog` will throw an exception in that situation.
 
@@ -131,5 +131,7 @@ If you pass a callback, it will receive an error and, if no error, an object wit
 `moog` works in the browser, provided that `async` and `lodash` are already global in the browser. `moog` defines itself as `window.moog`. Currently it is not set up for use with browserify but this would be trivial to arrange.
 
 ## Changelog
+
+0.1.1: added `afterConstruct`, another optional method which is invoked after `construct`. Like `beforeConstruct` and `construct` it can be sync or async. Unlike those methods it DOES NOT take the `options` parameter.
 
 0.1.0: bc break: `__meta` is now an object with `chain` and `name` properties. `chain` is the array of subclass metadata objects as before. `name` is the class name being instantiated. Also, `__meta` is fully populated before any constructors are called.

@@ -188,6 +188,16 @@
             step.construct(that, options);
           }
         });
+
+        _.each(steps, function(step) {
+          if (step.afterConstruct) {
+            if (step.afterConstruct.length === 3) {
+              throw new Error('moog.create was called synchronously for the type ' + type + ', but the ' + step.__name + ' class has an asynchronous afterConstruct method. You must provide a callback to create.');
+            }
+            step.afterConstruct(that, options);
+          }
+        });
+
         return that;
       }
 
@@ -251,6 +261,30 @@
                 return callback(new Error('construct must take the following arguments: "self", "options", and (if it is async) "callback"'));
               }
               return construct(that, options, callback);
+            }, callback);
+          },
+          afterConstruct: function(callback) {
+
+            return async.eachSeries(steps, function(step, callback) {
+              // Invoke afterConstruct, defaulting to an empty one
+              var afterConstruct = step.afterConstruct || function(self, callback) { return afterYield(callback); };
+
+              // Turn sync into async
+              if (afterConstruct.length === 1) {
+                var syncAfterConstruct = afterConstruct;
+                afterConstruct = function(self, callback) {
+                  try {
+                    syncAfterConstruct(self);
+                  } catch (e) {
+                    return afterYield(_.partial(callback, e));
+                  }
+                  return afterYield(callback);
+                };
+              }
+              if (afterConstruct.length < 2) {
+                return callback(new Error('afterConstruct must take the following arguments: "self", and (if it is async) "callback"'));
+              }
+              return afterConstruct(that, callback);
             }, callback);
           }
         }, function(err) {
