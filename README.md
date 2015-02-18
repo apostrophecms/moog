@@ -154,6 +154,8 @@ If you pass a callback, it will receive an error and, if no error, an object wit
 
 ## Changelog
 
+0.1.2: Updated some documentation.
+
 0.1.1: added `afterConstruct`, another optional method which is invoked after `construct`. Like `beforeConstruct` and `construct` it can be sync or async. Unlike those methods it DOES NOT take the `options` parameter.
 
 0.1.0: bc break: `__meta` is now an object with `chain` and `name` properties. `chain` is the array of subclass metadata objects as before. `name` is the class name being instantiated. Also, `__meta` is fully populated before any constructors are called.
