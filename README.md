@@ -59,7 +59,7 @@ var moog = require('moog')({
 
 ### moog.define(type, definition)
 
-Defines a new type. `type` is a string. A definition looks like:
+Defines a new type. `type` is a string. 
 
 ```javascript
 moog.define('baseclass', {
@@ -72,7 +72,7 @@ moog.define('baseclass', {
 });
 ```
 
-`construct` is invoked by `create` at a specific time, see below. `beforeConstruct` and `extend` are also specialized as described below. All other properties are treated as defaults for the `options` object provided when constructing an instance of the type.
+The `definition` object can contain the properties `construct`, `beforeConstruct`, and `afterConstruct`, which are functions invoked by `moog.create`, as described below. The `extend` property allows for subclassing. All other properties are treated as defaults for the `options` object provided when constructing an instance of the type.
 
 To subclass another type, just `extend` it by name in the definition of your subclass:
 
@@ -112,9 +112,31 @@ Returns true if the type is defined, whether explicitly or via the autoloader op
 
 ### moog.create(type, options, /* callback */)
 
-Creates an object of the specified `type`, passing `options`, which may be modified first by the default option values given in type definitions beginning with the deepest subclass, then by any `beforeConstruct` methods present, which are called for the deepest subclass first. Then the `construct` methods are called, if present, starting with the base class and ending with the final subclass. Finally the `afterConstruct` methods are called, if present, starting with the base class and ending with the final subclass.
+Creates an object of the specified `type`, passing `options` to override any default options set in `moog.define`.
 
-If a callback is given, the callback receives the arguments `err, obj` where `obj` is the object created. If a callback is not given, an exception is thrown in the event of an error, otherwise the object is returned. **There must not be any asynchronous beforeConstruct or construct methods if you create the object synchronously.** `moog` will throw an exception in that situation.
+```javascript
+moog.define('myObject', {
+  color: 'blue',
+  construct: function(self, options) {
+    self.color = options.color;
+  }
+});
+
+var myObject = moog.create('myObject', { color: 'purple' });
+alert("My object is " + myObject.color); // "My object is purple"
+```
+
+When `create` is called, `moog` will first call `beforeConstruct`, starting with the deepest subclass first. Then the `construct` methods are called, if present, starting with the base class and ending with the final subclass. Finally the `afterConstruct` methods are called, if present, starting with the base class and ending with the final subclass.
+
+In the above example, `moog.create` is called synchronously, but could be called asynchronously as follows:
+
+```javascript
+moog.create('myObject', { color: 'purple' }, function(err, myObject) {
+  alert("My object is " + myObject.color); // "My object is purple"
+});
+```
+
+If it's called asynchronously, the callback receives the arguments `err, obj` where `obj` is the object created. If it's called synchronously, an exception is thrown in the event of an error, otherwise the object is returned. **If you call `moog.create` synchronously but have asynchronous `beforeConstruct`, `construct`, or `afterConstruct` methods, `moog` will throw an exception.** You may, however, call `moog.create` asynchronously, even if your constructor functions are synchronous.
 
 `obj` will always have a `__meta` property, which contains an array of metadata objects describing each module in the inheritance chain, starting with the base class. The metadata objects will always have a `name` property. [moog-require](https://github.com/punkave/moog-require) also provides `dirname` and `filename`. This is useful to implement template overrides, or push browser-side javascript and styles defined by each level.
 
