@@ -697,6 +697,33 @@ describe('moog', function() {
       });
     });
 
+    it('should invoke afterConstruct with sync only', function() {
+      var moog = require('../index.js')({});
+
+      moog.define('baseClass', {
+        construct: function(self, options) {
+          self.monkeys = 3;
+        },
+        afterConstruct: function(self) {
+          self.monkeys = 5;
+        }
+      });
+
+      moog.define('subClass', {
+        extend: 'baseClass',
+        construct: function(self, options) {
+          self.monkeys = 4;
+        },
+        afterConstruct: function(self) {
+          self.monkeys = 7;
+        }
+      });
+
+      var item = moog.create('subClass', {});
+      assert(item);
+      assert(item.monkeys === 7);
+    });
+
     it('should handle a sync error in `construct`', function(done) {
       var moog = require('../index.js')({});
 
