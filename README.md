@@ -84,6 +84,8 @@ moog.define('subclass', {
 });
 ```
 
+**If you set the `defaultBaseClass` option of `moog`** and do not explicitly `extend` anything for a particular type, then that type will extend the `defaultBaseClass`. If you wish to override this behavior for a specific type, just set `extend` to `false`.
+
 **If you define the same class twice** without setting `extend` the second time, an *implicit subclass* is created. The new version subclasses the old one, effectively "patching" it with new options and behavior without having to redefine everything. All other types that subclass that name now subclass the new version.
 
 #### Defining many types at once
@@ -153,6 +155,8 @@ If you pass a callback, it will receive an error and, if no error, an object wit
 `moog` works in the browser, provided that `async` and `lodash` are already global in the browser. `moog` defines itself as `window.moog`. Currently it is not set up for use with browserify but this would be trivial to arrange.
 
 ## Changelog
+
+0.1.4: allow setting `extend` to `false` to explicitly turn off `defaultBaseClass` for a particular type. Also corrected the unit test for `defaultBaseClass` (the feature worked, but the test was wrong).
 
 0.1.3: never pass `options` to `afterConstruct`. We formerly were correctly leaving it off in the async case, but passing it in the sync case.
 

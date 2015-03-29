@@ -277,8 +277,7 @@ describe('moog', function() {
       });
 
       moog.define('subClass', {
-        color: 'red',
-        extend: 'baseClass'
+        color: 'red'
       });
 
       moog.create('subClass', {}, function(err, myObject) {
@@ -290,6 +289,31 @@ describe('moog', function() {
         // What we are testing is that _options got set at all
         // (see construct for baseClass)
         assert(myObject._options.color === 'red');
+        return done();
+      });
+    });
+
+    it('default base class should not take effect if extend is explicitly set to false', function(done) {
+      var moog = require('../index.js')({ defaultBaseClass: 'baseClass' });
+
+      moog.define('baseClass', {
+        construct: function(self, options) {
+          self._options = options;
+        }
+      });
+
+      moog.define('subClass', {
+        color: 'red',
+        extend: false
+      });
+
+      moog.create('subClass', {}, function(err, myObject) {
+        if (err) {
+          console.error(err);
+        }
+        assert(!err);
+        assert(myObject);
+        assert(!myObject._options);
         return done();
       });
     });

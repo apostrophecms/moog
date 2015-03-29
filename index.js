@@ -59,7 +59,7 @@
         definition.__meta.explicit = true;
       }
 
-      if (!definition.extend) {
+      if ((!definition.extend) && (definition.extend !== false)) {
         if (_.has(self.definitions, type)) {
           // Double definitions result in implicit subclassing of
           // the original definition by the new one; anything else
