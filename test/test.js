@@ -785,6 +785,30 @@ describe('moog', function() {
       });
     });
 
+    // cyclical references
+
+    it('should report an error synchronously on a cyclical reference (extend in a loop) when creating synchronously', function() {
+      var moog = require('../index.js')({});
+
+      moog.define('classOne', {
+        extend: 'classTwo'
+      });
+
+      moog.define('classTwo', {
+        extend: 'classOne'
+      });
+
+      var e;
+      var classOne;
+      try {
+        classOne = moog.create('classOne', {});
+      } catch (_e) {
+        e = _e;
+      }
+      assert(e);
+      assert(!classOne);
+    });
+
     it('should allow synchronous creation of a class with no asynchronous beforeConstruct or construct methods', function() {
       var moog = require('../index.js')({});
 
@@ -862,5 +886,28 @@ describe('moog', function() {
       }
       assert(errorReported);
     });
+
+    it('should report an error synchronously when creating a nonexistent type synchronously', function() {
+      var moog = require('../index.js')({});
+      var e;
+      var result;
+      try {
+        result = moog.create('nonesuch');
+      } catch (_e) {
+        e = _e;
+      }
+      assert(e);
+      assert(!result);
+    });
+
+    it('should report an error asynchronously when creating a nonexistent type asynchronously', function(done) {
+      var moog = require('../index.js')({});
+      moog.create('nonesuch', function(err, result) {
+        assert(err);
+        assert(!result);
+        done();
+      });
+    });
+
   });
 });

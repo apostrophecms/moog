@@ -124,12 +124,20 @@
       var seen = {};
       var next = self.definitions[type];
       if (!next) {
-        return callback(new Error('The type ' + type + ' is not defined.'));
+        if (!callback) {
+          throw 'The type ' + type + ' is not defined.';
+        } else {
+          return callback(new Error('The type ' + type + ' is not defined.'));
+        }
       }
       while (next) {
         var current = next;
         if (_.has(seen, current.__meta.ordinal)) {
-          return callback(new Error('The type ' + type + ' encounters an infinite loop, "extend" probably points back to itself or its subclass.'));
+          var error = new Error('The type ' + type + ' encounters an infinite loop, "extend" probably points back to itself or its subclass.');
+          if (callback) {
+            return callback(error);
+          }
+          throw error;
         }
         seen[current.__meta.ordinal] = true;
         steps.push(current);
