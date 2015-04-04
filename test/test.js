@@ -425,6 +425,65 @@ describe('moog', function() {
         return done();
       });
     });
+
+    it('extendIfFirst property is honored if there is no existing definition for the type to implicitly subclass', function(done){
+      var moog = require('../index.js')({});
+
+      moog.define('fallback', {
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('interloper');
+        }
+      });
+
+      moog.define('myObject', {
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('second');
+        },
+        extendIfFirst: 'fallback'
+      });
+
+      moog.create('myObject', {}, function(err, myObject) {
+        assert(!err);
+        assert(myObject);
+        assert(myObject._order.length === 2);
+        assert(myObject._order[0] === 'interloper');
+        assert(myObject._order[1] === 'second');
+        return done();
+      });
+    });
+
+    it('extendIfFirst property is ignored if there is an existing definition for the type', function(done){
+      var moog = require('../index.js')({});
+
+      moog.define('fallback', {
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('interloper');
+        }
+      });
+
+      moog.define('myObject', {
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('first');
+        }
+      });
+
+      moog.define('myObject', {
+        construct: function(self, options) {
+          self._order = (self._order || []).concat('second');
+        },
+        extendIfFirst: 'fallback'
+      });
+
+      moog.create('myObject', {}, function(err, myObject) {
+        assert(!err);
+        assert(myObject);
+        assert(myObject._order.length === 2);
+        assert(myObject._order[0] === 'first');
+        assert(myObject._order[1] === 'second');
+        return done();
+      });
+    });
+
   });
 
   describe('order of operations', function() {
@@ -908,6 +967,5 @@ describe('moog', function() {
         done();
       });
     });
-
   });
 });

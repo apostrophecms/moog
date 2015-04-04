@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/punkave/moog.svg?branch=master)](https://travis-ci.org/punkave/moog)
 
-Moog is for creating objects that can be subclassed.
+Moog creates objects, with rich support for subclassing and "implicit subclassing" (like "categories" in Objective C). Moog implements the "self pattern," so you never have to worry about using `.call`, `.apply` or `.bind`.
 
 ```javascript
 var moog = require('moog')();
@@ -84,9 +84,19 @@ moog.define('subclass', {
 });
 ```
 
+#### Default base class
+
 **If you set the `defaultBaseClass` option of `moog`** and do not explicitly `extend` anything for a particular type, then that type will extend the `defaultBaseClass`. If you wish to override this behavior for a specific type, just set `extend` to `false`.
 
-**If you define the same class twice** without setting `extend` the second time, an *implicit subclass* is created. The new version subclasses the old one, effectively "patching" it with new options and behavior without having to redefine everything. All other types that subclass that name now subclass the new version.
+#### Implicit subclassing
+
+**If you define the same class twice** without setting `extend` the second time, an *implicit subclass* is created.
+
+The new version subclasses the old one, effectively "patching" it with new options and behavior without having to redefine everything. All other types that subclass that name now subclass the new version.
+
+### Fallback base classes
+
+If you are not sure if there is an existing definition for the type, you can use `extendIfFirst` to specify a fallback base class. This is helpful when encouraging third-party developers to optionally define a type themselves.
 
 #### Defining many types at once
 
@@ -155,6 +165,8 @@ If you pass a callback, it will receive an error and, if no error, an object wit
 `moog` works in the browser, provided that `async` and `lodash` are already global in the browser. `moog` defines itself as `window.moog`. Currently it is not set up for use with browserify but this would be trivial to arrange.
 
 ## Changelog
+
+0.1.5: added support for `extendIfFirst`, useful when you don't know if there is an existing definition of the type. report certain errors synchronously when creating objects synchronously.
 
 0.1.4: allow setting `extend` to `false` to explicitly turn off `defaultBaseClass` for a particular type. Also corrected the unit test for `defaultBaseClass` (the feature worked, but the test was wrong).
 
