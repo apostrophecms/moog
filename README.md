@@ -164,7 +164,43 @@ If you pass a callback, it will receive an error and, if no error, an object wit
 
 `moog` works in the browser, provided that `async` and `lodash` are already global in the browser. `moog` defines itself as `window.moog`. Currently it is not set up for use with browserify but this would be trivial to arrange.
 
+### moog.mirror(meta, suffix)
+
+Often, it is useful for the same type hierarchy to exist in two separate instances of `moog` — for instance, on the server side and the browser side. It is also often useful to recreate the same type hierarchy, but with a suffix appended to each type name.
+
+If your server-side application has a "nifty-blog" type that inherits from "blog" which inherits from "pieces", you may want to ensure that the same types are defined on the browser side, and then take advantage of implicit subclassing to supply actual code for some or all of the types in the hierarchy.
+
+To pull this off, invoke `moog.mirror` with the `__meta` property of an instance of any type:
+
+`moog.mirror(niftyBlog.__meta);`
+
+If any of the types in the hierarchy already exist, they are left alone. This allows you to safely use `moog.mirror` to patch any gaps in the type hierarchy, making sure any types that were not explicitly defined are filled in implicitly.
+
+You may also optionally pass a `suffix` as the second argument. This is helpful if you wish to define types like this:
+
+`nifty-blog-editor : blog-editor : pieces-editor`
+`nifty-blog-manager : blog-manager : pieces-manager`
+
+That code looks like:
+
+`moog.mirror(niftyBlog.__meta, '-editor')`
+
+If you are using [moog-require](https://github.com/punkave/moog-require), the `__meta` property can contain information about where your types are defined in the filesystem. You might not want to disclose that information to the web browser. To avoid that, you may filter the `__meta` object:
+
+```javascript
+var meta = {
+  chain: []
+};
+_.each(object.__meta.chain, function(entry) {
+  meta.chain.push({ name: entry.name });
+});
+```
+
+Before making it available to the browser as JSON for use in a `moog.mirror` call.
+
 ## Changelog
+
+0.2.0: added support for `mirror`, which allows browser-side type hierarchies to match those used on the server side. To add actual code for those types, take advantage of the implicit subclassing feature of `moog.define`.
 
 0.1.5: added support for `extendIfFirst`, useful when you don't know if there is an existing definition of the type. report certain errors synchronously when creating objects synchronously.
 

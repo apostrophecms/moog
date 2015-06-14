@@ -967,5 +967,69 @@ describe('moog', function() {
         done();
       });
     });
+
+    it('should allow the mirroring of a type hierarchy in a new instance of moog', function() {
+      var moog1 = require('../index.js')({});
+      var moog2 = require('../index.js')({});
+      moog1.define('pieces', {});
+      moog1.define('blog', { extend: 'pieces' });
+      moog1.define('nifty-blog', { extend: 'blog' });
+      var niftyBlog1 = moog1.create('nifty-blog');
+      moog2.mirror(niftyBlog1.__meta);
+      // now provide some actual code for the grandfather type
+      // via implicit subclassing
+      moog2.define('pieces', {
+        age: 50,
+        construct: function(self, options) {
+          self.options = options;
+        }
+      });
+      niftyBlog2 = moog2.create('nifty-blog');
+      assert(niftyBlog2.options);
+      assert(niftyBlog2.options.age === 50);
+    });
+
+    it('should allow the suffixed mirroring of a type hierarchy in a new instance of moog', function() {
+      var moog1 = require('../index.js')({});
+      var moog2 = require('../index.js')({});
+      moog1.define('pieces', {});
+      moog1.define('blog', { extend: 'pieces' });
+      moog1.define('nifty-blog', { extend: 'blog' });
+      var niftyBlog1 = moog1.create('nifty-blog');
+      moog2.mirror(niftyBlog1.__meta, '-manager');
+      moog2.define('pieces-manager', {
+        age: 50,
+        construct: function(self, options) {
+          self.options = options;
+        }
+      });
+      var niftyBlogManager2 = moog2.create('nifty-blog-manager');
+      assert(niftyBlogManager2.options);
+      assert(niftyBlogManager2.options.age === 50);
+    });
+
+    it('mirror does not crush existing definitions', function() {
+      var moog1 = require('../index.js')({});
+      var moog2 = require('../index.js')({});
+      moog1.define('pieces', {});
+      moog1.define('blog', { extend: 'pieces' });
+      moog1.define('nifty-blog', { extend: 'blog' });
+      var niftyBlog1 = moog1.create('nifty-blog');
+
+      // now provide some actual code for the father type
+      // before calling mirror
+      moog2.define('blog', {
+        age: 50,
+        construct: function(self, options) {
+          self.options = options;
+        }
+      });
+
+      moog2.mirror(niftyBlog1.__meta);
+      niftyBlog2 = moog2.create('nifty-blog');
+      assert(niftyBlog2.options);
+      assert(niftyBlog2.options.age === 50);
+    });
+
   });
 });
