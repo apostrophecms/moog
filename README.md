@@ -200,6 +200,8 @@ Before making it available to the browser as JSON for use in a `moog.mirror` cal
 
 ## Changelog
 
+0.2.1: `__meta` property is available in `beforeConstruct`. I regard this as a bug fix as the idea was always to have this information be available as early as possible.
+
 0.2.0: added support for `mirror`, which allows browser-side type hierarchies to match those used on the server side. To add actual code for those types, take advantage of the implicit subclassing feature of `moog.define`.
 
 0.1.5: added support for `extendIfFirst`, useful when you don't know if there is an existing definition of the type. report certain errors synchronously when creating objects synchronously.
