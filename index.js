@@ -205,7 +205,7 @@
 
         _.each(steps, function(step) {
           if (step.afterConstruct) {
-            if (step.afterConstruct.length === 3) {
+            if (step.afterConstruct.length === 2) {
               throw new Error('moog.create was called synchronously for the type ' + type + ', but the ' + step.__name + ' class has an asynchronous afterConstruct method. You must provide a callback to create.');
             }
             step.afterConstruct(that);

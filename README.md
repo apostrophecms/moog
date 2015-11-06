@@ -200,6 +200,8 @@ Before making it available to the browser as JSON for use in a `moog.mirror` cal
 
 ## Changelog
 
+0.2.2: if `afterConstruct` expects a callback, calling `create` synchronously should throw an error. This is a bug fix, so no minor version bump is required.
+
 0.2.1: `__meta` property is available in `beforeConstruct`. I regard this as a bug fix as the idea was always to have this information be available as early as possible.
 
 0.2.0: added support for `mirror`, which allows browser-side type hierarchies to match those used on the server side. To add actual code for those types, take advantage of the implicit subclassing feature of `moog.define`.

@@ -946,6 +946,33 @@ describe('moog', function() {
       assert(errorReported);
     });
 
+    it('should not allow synchronous creation of a class with asynchronous afterConstruct methods', function() {
+      var moog = require('../index.js')({});
+
+      moog.define('baseclass', {
+        color: 'blue',
+        construct: function(self, options) {
+          self._options = options;
+        }
+      });
+
+      moog.define('subclass', {
+        color: 'red',
+        afterConstruct: function(self, callback) {
+          return setImmediate(callback);
+        },
+        extend: 'baseclass'
+      });
+
+      var errorReported = false;
+      try {
+        var obj = moog.create('subclass', {});
+      } catch (e) {
+        errorReported = true;
+      }
+      assert(errorReported);
+    });
+
     it('should report an error synchronously when creating a nonexistent type synchronously', function() {
       var moog = require('../index.js')({});
       var e;
