@@ -159,7 +159,10 @@
               // the default implementation
               next = self.define(nextName, undefined, current);
             } catch (e) {
-              return callback(e);
+              if (callback) {
+                return callback(e);
+              }
+              throw e;
             }
           }
         }

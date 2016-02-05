@@ -200,6 +200,8 @@ Before making it available to the browser as JSON for use in a `moog.mirror` cal
 
 ## Changelog
 
+0.2.4: throw the proper exception when synchronously creating a type that extends an undefined type. (Previously an exception was thrown, but it wasn't informative. It was an accidental benefit of trying to invoke a nonexistent callback.)
+
 0.2.3: exceptions thrown for attempts to synchronously create types with asynchronous beforeConstruct/construct/afterConstruct methods now include the correct name of the type or ancestor type that requires the call to be asynchronous.
 
 0.2.2: if `afterConstruct` expects a callback, calling `create` synchronously should throw an error. This is a bug fix, so no minor version bump is required.
