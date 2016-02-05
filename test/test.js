@@ -202,7 +202,7 @@ describe('moog', function() {
       });
     });
 
-    it('should be able to create a subclass with expected default option behavior', function(done) {
+    it('should be able to create a subclass with expected default option behavior (async)', function(done) {
       var moog = require('../index.js')({});
 
       moog.define('baseClass', {
@@ -226,6 +226,60 @@ describe('moog', function() {
         assert(myObject._options.color === 'red');
         return done();
       });
+    });
+
+    it('should be able to create a subclass with expected default option behavior (sync)', function() {
+      var moog = require('../index.js')({});
+
+      moog.define('baseClass', {
+        color: 'blue',
+        construct: function(self, options) {
+          self._options = options;
+        }
+      });
+
+      moog.define('subClass', {
+        color: 'red',
+        extend: 'baseClass'
+      });
+
+      var myObject = moog.create('subClass', {});
+      assert(myObject);
+      assert(myObject._options.color === 'red');
+    });
+
+    it('should report an error gracefully if subclass to be extended does not exist (async)', function(done) {
+      var moog = require('../index.js')({});
+
+      // base class does not actually exist
+      moog.define('subClass', {
+        color: 'red',
+        extend: 'baseClass'
+      });
+
+      moog.create('subClass', {}, function(err, myObject) {
+        assert(err);
+        return done();
+      });
+    });
+
+    it('should throw an exception gracefully if subclass to be extended does not exist (sync)', function() {
+      var moog = require('../index.js')({});
+
+      // base class does not actually exist
+      moog.define('subClass', {
+        color: 'red',
+        extend: 'baseClass'
+      });
+
+      var exception;
+      try {
+        var myObject = moog.create('subClass', {});
+      } catch (e) {
+        exception = e;
+      }
+      assert(exception);
+      assert(exception.toString().match(/baseClass/));
     });
 
     it('should be able to `extend` a subclass into yet another subclass', function(done) {
