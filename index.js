@@ -92,9 +92,13 @@
       return self.define(type, definition);
     };
 
-    self.isDefined = function(type) {
+    self.isDefined = function(type, options) {
+      options = options || {};
       if (_.has(self.definitions, type)) {
         return true;
+      }
+      if (options.autoload === false) {
+        return false;
       }
       try {
         // Can we autoload it?

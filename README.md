@@ -118,9 +118,11 @@ moog.define({
 
 Explicitly replaces any previous definition of `type` with a new one. Does *not* subclass the old type. If there was no old definition, this method is equivalent to `moog.define`.
 
-### moog.isDefined(type)
+### moog.isDefined(type, options)
 
-Returns true if the type is defined, whether explicitly or via the autoloader option. That is, `moog.create` will succeed for `type`, provided that the constructor does not signal an error.
+Returns true if the type is defined, whether explicitly or via the autoloader option. That is, `moog.create` will succeed for `type`, provided that the constructor does not signal an error. If the type is available via the autoloader, this method returns true but does not leave the definition in place.
+
+The `options` argument may be omitted entirely. If `options.autoload` is explicitly set to `false`, no attempt to test for the ability to load the type via the autoloader is made.
 
 ### moog.create(type, options, /* callback */)
 
@@ -199,6 +201,10 @@ _.each(object.__meta.chain, function(entry) {
 Before making it available to the browser as JSON for use in a `moog.mirror` call.
 
 ## Changelog
+
+All tests passing.
+
+0.3.0: new `options` argument to `isDefined`, which may contain an `autoloader: false` property to prevent `isDefined` from attempting to test whether the type can be defined by the autoloader.
 
 0.2.3: exceptions thrown for attempts to synchronously create types with asynchronous beforeConstruct/construct/afterConstruct methods now include the correct name of the type or ancestor type that requires the call to be asynchronous.
 
