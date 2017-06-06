@@ -403,6 +403,19 @@
         lastName = name;
       });
     };
+    
+    // Returns true if the given object is of the given moog type.
+    // If the object is not a moog object, `false` is returned.
+    
+    self.instanceOf = function(object, name) {
+      if (!object.__meta) {
+        return false;
+      }
+      if (!object.__meta.chain) {
+        return false;
+      }
+      return !!_.find(object.__meta.chain, { name: name });
+    };
 
     return self;
 

@@ -1112,5 +1112,32 @@ describe('moog', function() {
       assert(niftyBlog2.options.age === 50);
     });
 
+    it('instanceOf should yield correct results', function() {
+      var moog = require('../index.js')({});
+
+      moog.define('classOne', {});
+      
+      moog.define('classTwo', {
+        extend: 'classOne'
+      });
+      
+      moog.define('classThree', {});
+      
+      moog.define('classFour', {
+        extend: 'classTwo'
+      });
+      
+      var one = moog.create('classOne');
+      var two = moog.create('classTwo');
+      var three = moog.create('classThree');
+      var four = moog.create('classFour');
+      var rando = { strange: 'object' };
+      
+      assert(moog.instanceOf(one, 'classOne'));
+      assert(moog.instanceOf(two, 'classOne'));
+      assert(!moog.instanceOf(three, 'classOne'));
+      assert(moog.instanceOf(four, 'classOne'));
+      assert(!moog.instanceOf(rando));
+    });
   });
 });

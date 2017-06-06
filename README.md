@@ -204,6 +204,8 @@ Before making it available to the browser as JSON for use in a `moog.mirror` cal
 
 All tests passing.
 
+0.3.1: new `instanceOf` method. Given an object and a type name, this method returns true if the object is of the given type or a type that extends it.
+
 0.3.0: new `options` argument to `isDefined`, which may contain an `autoloader: false` property to prevent `isDefined` from attempting to test whether the type can be defined by the autoloader.
 
 0.2.4: throw the proper exception when synchronously creating a type that extends an undefined type. (Previously an exception was thrown, but it wasn't informative. It was an accidental benefit of trying to invoke a nonexistent callback.)
