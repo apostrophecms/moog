@@ -19,11 +19,14 @@ moog.define('baseclass', {
   }
 });
 
+var goGetTheCandy = function(options, callback){ /* async callback */ };
+
 moog.define('subclass', {
   color: 'red',
+  extend: 'baseclass',
   // async constructor
   construct: function(self, options, callback) {
-    return goGetTheCandy(function(err, results) {
+    return goGetTheCandy(options, function(err, results) {
       if (err) {
        return callback(err);
       }
