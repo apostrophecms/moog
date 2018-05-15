@@ -204,6 +204,8 @@ Before making it available to the browser as JSON for use in a `moog.mirror` cal
 
 All tests passing.
 
+1.0.0: updated `lodash` and `mocha` to satisfy `npm audit`. Code is still compatible with lodash 3.x as well, for those using the `@sailshq/lodash` fork for bc, and for Apostrophe's frontend which uses that version and shouldn't push multiple versions.
+
 0.3.1: new `instanceOf` method. Given an object and a type name, this method returns true if the object is of the given type or a type that extends it.
 
 0.3.0: new `options` argument to `isDefined`, which may contain an `autoloader: false` property to prevent `isDefined` from attempting to test whether the type can be defined by the autoloader.
