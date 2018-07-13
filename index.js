@@ -1,6 +1,5 @@
 (function() {
   var async, _;
-
   if (typeof module !== 'undefined') {
     // For npm
     async = require('async');
@@ -37,7 +36,7 @@
 
     self.define = function(type, definition, extending) {
       // Define many in a single call
-      if (typeof(type) === 'object') {
+      if (typeof (type) === 'object') {
         // Apply any definitions passed directly to the factory function
         _.each(type || {}, function(definition, name) {
           self.define(name, definition);
@@ -51,6 +50,12 @@
         // self.define to handle this case
         throw new Error(new Error('The type ' + type + ' is not defined.'));
       }
+
+      // Make a shallow clone to avoid numerous problems with multiple
+      // intentionally separate instances of moog; otherwise they wind
+      // up sharing `__meta` depending on whether they were loaded with
+      // `require`, and so on
+      definition = _.clone(definition);
       definition.__meta = definition.__meta || {};
       definition.__meta.name = type;
       definition.__meta.ordinal = self.ordinal++;
@@ -119,14 +124,12 @@
       if (arguments.length === 1) {
         options = {};
       } else if (arguments.length === 2) {
-        if (typeof(arguments[1]) === 'function') {
+        if (typeof (arguments[1]) === 'function') {
           callback = arguments[1];
           options = {};
         }
       }
       options = options || {};
-
-      var definition;
 
       var that = {};
       var steps = [];
@@ -154,7 +157,7 @@
         // In most cases it'll be a string we need to look up
         // in self.definitions. In a few cases it is already
         // a pointer to another definition (see double defines, above)
-        if (typeof(next) === 'string') {
+        if (typeof (next) === 'string') {
           var nextName = next;
           next = self.definitions[nextName];
           if (!next) {
@@ -330,7 +333,7 @@
       var result = {};
       var defined = _.keys(self.definitions);
       var explicit = _.filter(defined, function(type) {
-        return self.definitions[type].__meta.explicit = true;
+        return self.definitions[type].__meta.explicit === true;
       });
 
       if (callback) {
@@ -386,7 +389,7 @@
           module.setBridge(modules);
         }
       });
-    }
+    };
 
     self.mirror = function(meta, suffix) {
       var lastName;
@@ -403,10 +406,10 @@
         lastName = name;
       });
     };
-    
+
     // Returns true if the given object is of the given moog type.
     // If the object is not a moog object, `false` is returned.
-    
+
     self.instanceOf = function(object, name) {
       if (!object.__meta) {
         return false;
@@ -427,4 +430,3 @@
     window.moog = moog;
   }
 })();
-

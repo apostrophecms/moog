@@ -57,7 +57,7 @@ describe('moog', function() {
       var moog = require('../index.js')({});
 
       moog.define('myObject', {
-        construct: function(){}
+        construct: function() {}
       });
     });
 
@@ -84,10 +84,10 @@ describe('moog', function() {
 
       moog.define({
         'myObjectOne': {
-          construct: function(self, options){}
+          construct: function(self, options) {}
         },
         'myObjectTwo': {
-          construct: function(self, options){}
+          construct: function(self, options) {}
         }
       });
 
@@ -274,7 +274,7 @@ describe('moog', function() {
 
       var exception;
       try {
-        var myObject = moog.create('subClass', {});
+        moog.create('subClass', {});
       } catch (e) {
         exception = e;
       }
@@ -455,7 +455,7 @@ describe('moog', function() {
   });
 
   describe('implicit subclassing behavior', function() {
-    it('should allow a class defined twice to be implicitly subclassed', function(done){
+    it('should allow a class defined twice to be implicitly subclassed', function(done) {
       var moog = require('../index.js')({});
 
       moog.define('myObject', {
@@ -480,7 +480,7 @@ describe('moog', function() {
       });
     });
 
-    it('extendIfFirst property is honored if there is no existing definition for the type to implicitly subclass', function(done){
+    it('extendIfFirst property is honored if there is no existing definition for the type to implicitly subclass', function(done) {
       var moog = require('../index.js')({});
 
       moog.define('fallback', {
@@ -506,7 +506,7 @@ describe('moog', function() {
       });
     });
 
-    it('extendIfFirst property is ignored if there is an existing definition for the type', function(done){
+    it('extendIfFirst property is ignored if there is an existing definition for the type', function(done) {
       var moog = require('../index.js')({});
 
       moog.define('fallback', {
@@ -965,7 +965,7 @@ describe('moog', function() {
 
       var errorReported = false;
       try {
-        var obj = moog.create('subclass', {});
+        moog.create('subclass', {});
       } catch (e) {
         errorReported = true;
       }
@@ -993,7 +993,7 @@ describe('moog', function() {
 
       var errorReported = false;
       try {
-        var obj = moog.create('subclass', {});
+        moog.create('subclass', {});
       } catch (e) {
         errorReported = true;
       }
@@ -1020,7 +1020,7 @@ describe('moog', function() {
 
       var errorReported = false;
       try {
-        var obj = moog.create('subclass', {});
+        moog.create('subclass', {});
       } catch (e) {
         errorReported = true;
       }
@@ -1065,7 +1065,7 @@ describe('moog', function() {
           self.options = options;
         }
       });
-      niftyBlog2 = moog2.create('nifty-blog');
+      var niftyBlog2 = moog2.create('nifty-blog');
       assert(niftyBlog2.options);
       assert(niftyBlog2.options.age === 50);
     });
@@ -1107,7 +1107,7 @@ describe('moog', function() {
       });
 
       moog2.mirror(niftyBlog1.__meta);
-      niftyBlog2 = moog2.create('nifty-blog');
+      var niftyBlog2 = moog2.create('nifty-blog');
       assert(niftyBlog2.options);
       assert(niftyBlog2.options.age === 50);
     });
@@ -1116,23 +1116,23 @@ describe('moog', function() {
       var moog = require('../index.js')({});
 
       moog.define('classOne', {});
-      
+
       moog.define('classTwo', {
         extend: 'classOne'
       });
-      
+
       moog.define('classThree', {});
-      
+
       moog.define('classFour', {
         extend: 'classTwo'
       });
-      
+
       var one = moog.create('classOne');
       var two = moog.create('classTwo');
       var three = moog.create('classThree');
       var four = moog.create('classFour');
       var rando = { strange: 'object' };
-      
+
       assert(moog.instanceOf(one, 'classOne'));
       assert(moog.instanceOf(two, 'classOne'));
       assert(!moog.instanceOf(three, 'classOne'));

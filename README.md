@@ -204,6 +204,10 @@ Before making it available to the browser as JSON for use in a `moog.mirror` cal
 
 All tests passing.
 
+1.0.1: shallowly clone each definition to avoid numerous problems when multiple instances of `moog` intended to be separate worlds wind up sharing the same definition objects due to the `require` cache. A shallow clone gives us independent `__meta` properties, which are all we need to solve the problem. Definitions are few, instances are many and the clone is shallow, so this is not a significant performance hit.
+
+Also, use the apostrophe eslint test configuration. This required various syntax updates and flushed out a few oddities although no bugs.
+
 1.0.0: updated `lodash` and `mocha` to satisfy `npm audit`. Code is still compatible with lodash 3.x as well, for those using the `@sailshq/lodash` fork for bc, and for Apostrophe's frontend which uses that version and shouldn't push multiple versions.
 
 0.3.1: new `instanceOf` method. Given an object and a type name, this method returns true if the object is of the given type or a type that extends it.
