@@ -54,8 +54,17 @@
       // Make a shallow clone to avoid numerous problems with multiple
       // intentionally separate instances of moog; otherwise they wind
       // up sharing `__meta` depending on whether they were loaded with
-      // `require`, and so on
+      // `require`, and so on. We must clone `__meta` itself for the
+      // same reason, and also `__meta.chain` because it is an array
+      // object. All other properties of `__meta` are simple values.
+
       definition = _.clone(definition);
+      if (definition.__meta !== undefined) {
+        definition.__meta = _.clone(definition.__meta);
+        if (definition.__meta.chain) {
+          definition.__meta.chain = _.clone(definition.__meta.chain);
+        }
+      }
       definition.__meta = definition.__meta || {};
       definition.__meta.name = type;
       definition.__meta.ordinal = self.ordinal++;
