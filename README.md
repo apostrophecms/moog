@@ -204,6 +204,8 @@ Before making it available to the browser as JSON for use in a `moog.mirror` cal
 
 All tests passing.
 
+1.0.3: nudging past npm not making 1.0.2 available for some reason; no code changes.
+
 1.0.2: in addition to the shallow top-level clone, we must also clone the `__meta` property and its `__meta.chain` subproperty to ensure they are not reused between instances of `moog`. No other properties of the definition are objects subject to modification.
 
 1.0.1: shallowly clone each definition to avoid numerous problems when multiple instances of `moog` intended to be separate worlds wind up sharing the same definition objects due to the `require` cache. A shallow clone gives us independent `__meta` properties, which are all we need to solve the problem. Definitions are few, instances are many and the clone is shallow, so this is not a significant performance hit.
