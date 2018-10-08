@@ -1,68 +1,50 @@
-var assert = require('assert');
+const assert = require('assert');
 
 describe('moog', function() {
-  it('should exist', function(done) {
-    var moog = require('../index.js')({ });
+  it('should exist', function() {
+    const moog = require('../index.js')({ });
 
     assert(moog);
-    return done();
   });
 
-  it('should be initialized without arguments', function(done) {
-    var moog = require('../index.js')();
+  it('should be initialized without arguments', function() {
+    const moog = require('../index.js')();
     assert(moog);
-    return done();
   });
 
   describe('methods', function() {
-    it('should have a `define` method', function(done) {
-      var moog = require('../index.js')({});
+    it('should have a `define` method', function() {
+      const moog = require('../index.js')({});
       assert(moog.define);
-      return done();
     });
 
-    it('should have a `redefine` method', function(done) {
-      var moog = require('../index.js')({});
+    it('should have a `redefine` method', function() {
+      const moog = require('../index.js')({});
       assert(moog.redefine);
-      return done();
     });
 
-    it('should have a `create` method', function(done) {
-      var moog = require('../index.js')({});
+    it('should have a `create` method', function() {
+      const moog = require('../index.js')({});
       assert(moog.create);
-      return done();
     });
 
-    it('should have a `createAll` method', function(done) {
-      var moog = require('../index.js')({});
-      assert(moog.createAll);
-      return done();
-    });
-
-    it('should have a `bridge` method', function(done) {
-      var moog = require('../index.js')({});
-      assert(moog.bridge);
-      return done();
-    });
-
-    it('should have a `isDefined` method', function(done) {
-      var moog = require('../index.js')({});
+    it('should have an `isDefined` method', function() {
+      const moog = require('../index.js')({});
       assert(moog.isDefined);
-      return done();
     });
   });
 
   describe('defining and creating', function() {
-    it('should be able to `define` an instance', function() {
-      var moog = require('../index.js')({});
+    it('should be able to `define` a class', function() {
+      const moog = require('../index.js')({});
 
       moog.define('myObject', {
         construct: function() {}
       });
     });
 
-    it('should be able to `define` and then `create` an instance', function(done) {
-      var moog = require('../index.js')({});
+    it('should be able to `define` and then `create` an instance', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('myObject', {
         color: 'blue',
@@ -71,16 +53,13 @@ describe('moog', function() {
         }
       });
 
-      moog.create('myObject', {}, function(err, myObject) {
-        assert(!err);
-        assert(myObject);
-        assert(myObject._options.color === 'blue');
-        return done();
-      });
+      const myObject = await moog.create('myObject', {});
+      assert(myObject);
+      assert(myObject._options.color === 'blue');
     });
 
-    it('should be able to `define` multiple types using an object', function(done) {
-      var moog = require('../index.js')({});
+    it('should be able to `define` multiple classes using an object', async function() {
+      const moog = require('../index.js')({});
 
       moog.define({
         'myObjectOne': {
@@ -91,101 +70,42 @@ describe('moog', function() {
         }
       });
 
-      moog.create('myObjectOne', {}, function(err, myObject) {
-        if (err) {
-          console.error(err);
-        }
-        assert(!err);
-        assert(myObject);
-        return done();
-      });
+      const myObject = await moog.create('myObjectOne', {});
+      assert(myObject);
     });
-
-    it('should create multiple modules using `createAll`', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('objectOne', {
-        construct: function(self, options) { }
-      });
-
-      moog.define('objectTwo', {
-        construct: function(self, options) { }
-      });
-
-      moog.createAll({}, {}, function(err, modules) {
-        if (err) {
-          console.error(err);
-        }
-        assert(!err);
-        assert(modules);
-        assert(modules.objectOne);
-        assert(modules.objectTwo);
-        return done();
-      });
-    });
-
-    it('should create multiple modules using `createAll` synchronously', function() {
-      var moog = require('../index.js')({});
-
-      moog.define('objectOne', {
-        construct: function(self, options) { }
-      });
-
-      moog.define('objectTwo', {
-        construct: function(self, options) { }
-      });
-
-      var modules = moog.createAll({}, {});
-
-      assert(modules);
-      assert(modules.objectOne);
-      assert(modules.objectTwo);
-    });
-
   });
 
-  describe('`create` and `createAll` syntax', function() {
-    it('should `create` without options or a callback', function() {
-      var moog = require('../index.js')();
+  describe('`create` and `createSync` syntax', function() {
+    it('should `createSync` without options', function() {
+      const moog = require('../index.js')();
 
       moog.define('myClass', {
         construct: function(self, options) { }
       });
 
-      var myClass = moog.create('myClass');
-      assert(myClass);
+      var myObject = moog.createSync('myClass');
+      assert(myObject);
+      assert(myObject.__meta.name === 'myClass');
     });
 
-    it('should `create` without options', function(done) {
-      var moog = require('../index.js')();
+    it('should `create` without options', async function() {
+      const moog = require('../index.js')();
 
       moog.define('myClass', {
         construct: function(self, options) { }
       });
 
-      moog.create('myClass', function(err, myClass) {
-        assert(!err);
-        assert(myClass);
-        return done();
-      });
+      const myObj = await moog.create('myClass');
+      assert(myObj);
+      assert(myObj.__meta.name === 'myClass');
     });
 
-    it('should `create` without a callback', function() {
-      var moog = require('../index.js')();
-
-      moog.define('myClass', {
-        construct: function(self, options) { }
-      });
-
-      var myClass = moog.create('myClass', {});
-      assert(myClass);
-    });
   });
 
   describe('explicit subclassing behavior', function() {
 
-    it('should be able to override a default option value at create time', function(done) {
-      var moog = require('../index.js')({});
+    it('should be able to override a default option value at create time', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('myObject', {
         color: 'blue',
@@ -194,16 +114,13 @@ describe('moog', function() {
         }
       });
 
-      moog.create('myObject', { color: 'purple' }, function(err, myObject) {
-        assert(!err);
-        assert(myObject);
-        assert(myObject._options.color === 'purple');
-        return done();
-      });
+      const myObject = await moog.create('myObject', { color: 'purple' });
+      assert(myObject);
+      assert(myObject._options.color === 'purple');
     });
 
-    it('should be able to create a subclass with expected default option behavior (async)', function(done) {
-      var moog = require('../index.js')({});
+    it('should be able to create a subclass with expected default option behavior (async)', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('baseClass', {
         color: 'blue',
@@ -217,39 +134,33 @@ describe('moog', function() {
         extend: 'baseClass'
       });
 
-      moog.create('subClass', {}, function(err, myObject) {
-        if (err) {
-          console.error(err);
-        }
-        assert(!err);
-        assert(myObject);
-        assert(myObject._options.color === 'red');
-        return done();
-      });
-    });
-
-    it('should be able to create a subclass with expected default option behavior (sync)', function() {
-      var moog = require('../index.js')({});
-
-      moog.define('baseClass', {
-        color: 'blue',
-        construct: function(self, options) {
-          self._options = options;
-        }
-      });
-
-      moog.define('subClass', {
-        color: 'red',
-        extend: 'baseClass'
-      });
-
-      var myObject = moog.create('subClass', {});
+      const myObject = await moog.create('subClass', {});
       assert(myObject);
       assert(myObject._options.color === 'red');
     });
 
-    it('should report an error gracefully if subclass to be extended does not exist (async)', function(done) {
-      var moog = require('../index.js')({});
+    it('should be able to create a subclass with expected default option behavior (sync)', function() {
+      const moog = require('../index.js')({});
+
+      moog.define('baseClass', {
+        color: 'blue',
+        construct: function(self, options) {
+          self._options = options;
+        }
+      });
+
+      moog.define('subClass', {
+        color: 'red',
+        extend: 'baseClass'
+      });
+
+      const myObject = moog.createSync('subClass', {});
+      assert(myObject);
+      assert(myObject._options.color === 'red');
+    });
+
+    it('should report an error gracefully if subclass to be extended does not exist (async)', async function() {
+      const moog = require('../index.js')({});
 
       // base class does not actually exist
       moog.define('subClass', {
@@ -257,14 +168,17 @@ describe('moog', function() {
         extend: 'baseClass'
       });
 
-      moog.create('subClass', {}, function(err, myObject) {
-        assert(err);
-        return done();
-      });
+      try {
+        await moog.create('subClass', {});
+        assert(false);
+      } catch (e) {
+        assert(e);
+        assert(e.toString().match(/baseClass/));
+      }
     });
 
     it('should throw an exception gracefully if subclass to be extended does not exist (sync)', function() {
-      var moog = require('../index.js')({});
+      const moog = require('../index.js')({});
 
       // base class does not actually exist
       moog.define('subClass', {
@@ -272,18 +186,17 @@ describe('moog', function() {
         extend: 'baseClass'
       });
 
-      var exception;
       try {
-        moog.create('subClass', {});
+        moog.createSync('subClass', {});
+        assert(false);
       } catch (e) {
-        exception = e;
+        assert(e);
+        assert(e.toString().match(/baseClass/));
       }
-      assert(exception);
-      assert(exception.toString().match(/baseClass/));
     });
 
-    it('should be able to `extend` a subclass into yet another subclass', function(done) {
-      var moog = require('../index.js')({});
+    it('should be able to `extend` a subclass into yet another subclass', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('baseClass', {
         color: 'blue',
@@ -302,19 +215,13 @@ describe('moog', function() {
         extend: 'subClassOne'
       });
 
-      moog.create('subClassTwo', {}, function(err, myObject) {
-        if (err) {
-          console.error(err);
-        }
-        assert(!err);
-        assert(myObject);
-        assert(myObject._options.color === 'green');
-        return done();
-      });
+      const myObject = await moog.create('subClassTwo', {});
+      assert(myObject);
+      assert(myObject._options.color === 'green');
     });
 
-    it('default base class should take effect if configured', function(done) {
-      var moog = require('../index.js')({ defaultBaseClass: 'baseClass' });
+    it('default base class should take effect if configured', async function() {
+      const moog = require('../index.js')({ defaultBaseClass: 'baseClass' });
 
       moog.define('baseClass', {
         construct: function(self, options) {
@@ -334,21 +241,15 @@ describe('moog', function() {
         color: 'red'
       });
 
-      moog.create('subClass', {}, function(err, myObject) {
-        if (err) {
-          console.error(err);
-        }
-        assert(!err);
-        assert(myObject);
-        // What we are testing is that _options got set at all
-        // (see construct for baseClass)
-        assert(myObject._options.color === 'red');
-        return done();
-      });
+      const myObject = await moog.create('subClass', {});
+      assert(myObject);
+      // What we are testing is that _options got set at all
+      // (see construct for baseClass)
+      assert(myObject._options.color === 'red');
     });
 
-    it('default base class should not take effect if extend is explicitly set to false', function(done) {
-      var moog = require('../index.js')({ defaultBaseClass: 'baseClass' });
+    it('default base class should not take effect if extend is explicitly set to false', async function() {
+      const moog = require('../index.js')({ defaultBaseClass: 'baseClass' });
 
       moog.define('baseClass', {
         construct: function(self, options) {
@@ -361,57 +262,17 @@ describe('moog', function() {
         extend: false
       });
 
-      moog.create('subClass', {}, function(err, myObject) {
-        if (err) {
-          console.error(err);
-        }
-        assert(!err);
-        assert(myObject);
-        assert(!myObject._options);
-        return done();
-      });
-    });
-
-    it('should allow modules to reference each other using `bridge`', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('objectOne', {
-        construct: function(self, options) {
-          self._options = options;
-          self.setBridge = function(modules) {
-            self._otherModule = modules.objectOne;
-          };
-        }
-      });
-
-      moog.define('objectTwo', {
-        color: 'red',
-        construct: function(self, options) {
-          self._options = options;
-          self.setBridge = function(modules) {
-            self._otherModule = modules.objectTwo;
-          };
-        }
-      });
-
-      moog.createAll({}, {}, function(err, modules) {
-        if (err) {
-          console.error(err);
-        }
-        assert(!err);
-        moog.bridge(modules);
-        assert(modules.objectOne._otherModule);
-        assert(modules.objectTwo._otherModule);
-        return done();
-      });
+      const myObject = await moog.create('subClass', {});
+      assert(myObject);
+      assert(!myObject._options);
     });
 
     // ==================================================
     // `redefine` AND `isDefined`
     // ==================================================
 
-    it('should allow a module to be redefined', function(done) {
-      var moog = require('../index.js')({});
+    it('should allow a module to be redefined', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('myObject', {
         construct: function(self, options) {
@@ -425,17 +286,14 @@ describe('moog', function() {
         }
       });
 
-      moog.create('myObject', {}, function(err, myObject) {
-        assert(!err);
-        assert(myObject);
-        assert(!myObject._oldProperty);
-        assert(myObject._newProperty);
-        return done();
-      });
+      const myObject = await moog.create('myObject', {});
+      assert(myObject);
+      assert(!myObject._oldProperty);
+      assert(myObject._newProperty);
     });
 
     it('should find a module definition using `isDefined`', function() {
-      var moog = require('../index.js')({});
+      const moog = require('../index.js')({});
 
       moog.define('myObject', {
         construct: function(self, options) {
@@ -447,7 +305,7 @@ describe('moog', function() {
     });
 
     it('should NOT find a non-existant module definition using `isDefined`', function() {
-      var moog = require('../index.js')({});
+      const moog = require('../index.js')({});
 
       assert(!moog.isDefined('myObject'));
     });
@@ -455,8 +313,8 @@ describe('moog', function() {
   });
 
   describe('implicit subclassing behavior', function() {
-    it('should allow a class defined twice to be implicitly subclassed', function(done) {
-      var moog = require('../index.js')({});
+    it('should allow a class defined twice to be implicitly subclassed', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('myObject', {
         construct: function(self, options) {
@@ -470,18 +328,14 @@ describe('moog', function() {
         }
       });
 
-      moog.create('myObject', {}, function(err, myObject) {
-        assert(!err);
-        assert(myObject);
-
-        assert(myObject._order[0] === 'first');
-        assert(myObject._order[1] === 'second');
-        return done();
-      });
+      const myObject = await moog.create('myObject', {});
+      assert(myObject);
+      assert(myObject._order[0] === 'first');
+      assert(myObject._order[1] === 'second');
     });
 
-    it('extendIfFirst property is honored if there is no existing definition for the type to implicitly subclass', function(done) {
-      var moog = require('../index.js')({});
+    it('extendIfFirst property is honored if there is no existing definition for the type to implicitly subclass', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('fallback', {
         construct: function(self, options) {
@@ -496,18 +350,15 @@ describe('moog', function() {
         extendIfFirst: 'fallback'
       });
 
-      moog.create('myObject', {}, function(err, myObject) {
-        assert(!err);
-        assert(myObject);
-        assert(myObject._order.length === 2);
-        assert(myObject._order[0] === 'interloper');
-        assert(myObject._order[1] === 'second');
-        return done();
-      });
+      const myObject = await moog.create('myObject', {});
+      assert(myObject);
+      assert(myObject._order.length === 2);
+      assert(myObject._order[0] === 'interloper');
+      assert(myObject._order[1] === 'second');
     });
 
-    it('extendIfFirst property is ignored if there is an existing definition for the type', function(done) {
-      var moog = require('../index.js')({});
+    it('extendIfFirst property is ignored if there is an existing definition for the type', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('fallback', {
         construct: function(self, options) {
@@ -528,14 +379,11 @@ describe('moog', function() {
         extendIfFirst: 'fallback'
       });
 
-      moog.create('myObject', {}, function(err, myObject) {
-        assert(!err);
-        assert(myObject);
-        assert(myObject._order.length === 2);
-        assert(myObject._order[0] === 'first');
-        assert(myObject._order[1] === 'second');
-        return done();
-      });
+      const myObject = await moog.create('myObject', {});
+      assert(myObject);
+      assert(myObject._order.length === 2);
+      assert(myObject._order[0] === 'first');
+      assert(myObject._order[1] === 'second');
     });
 
   });
@@ -546,8 +394,8 @@ describe('moog', function() {
     // ORDERING
     // ==================================================
 
-    it('should call `construct` methods baseClass-first', function(done) {
-      var moog = require('../index.js')({});
+    it('should call `construct` methods baseClass-first', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('baseClass', {
         construct: function(self, options) {
@@ -569,17 +417,14 @@ describe('moog', function() {
         }
       });
 
-      moog.create('subClassTwo', {}, function(err, subClassTwo) {
-        assert(!err);
-        assert(subClassTwo._order[0] === 'first');
-        assert(subClassTwo._order[1] === 'second');
-        assert(subClassTwo._order[2] === 'third');
-        return done();
-      });
+      const subClassTwo = await moog.create('subClassTwo', {});
+      assert(subClassTwo._order[0] === 'first');
+      assert(subClassTwo._order[1] === 'second');
+      assert(subClassTwo._order[2] === 'third');
     });
 
-    it('should call `beforeConstruct` methods subClass-first', function(done) {
-      var moog = require('../index.js')({});
+    it('should call `beforeConstruct` methods subClass-first', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('baseClass', {
         beforeConstruct: function(self, options) {
@@ -601,287 +446,21 @@ describe('moog', function() {
         }
       });
 
-      moog.create('subClassTwo', {}, function(err, subClassTwo) {
-        assert(!err);
-        assert(subClassTwo._order[0] === 'first');
-        assert(subClassTwo._order[1] === 'second');
-        assert(subClassTwo._order[2] === 'third');
-        return done();
-      });
+      const subClassTwo = await moog.create('subClassTwo', {});
+      assert(subClassTwo._order[0] === 'first');
+      assert(subClassTwo._order[1] === 'second');
+      assert(subClassTwo._order[2] === 'third');
     });
 
-    // ==================================================
-    // SYNC AND ASYNC PLAYING NICELY
-    // ==================================================
-
-    it('should extend an async `construct` method with a sync version', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('baseClass', {
-        construct: function(self, options, callback) {
-          // Base class constructor can see complete metadata in an
-          // async environment. -Tom
-          assert(self.__meta.chain);
-          assert(self.__meta.chain[0]);
-          assert(self.__meta.chain[0].name === 'baseClass');
-          assert(self.__meta.chain[1].name === 'subClass');
-          assert(self.__meta.name === 'subClass');
-
-          self._order = (self._order || []).concat('first');
-          return setImmediate(callback);
-        }
-      });
-
-      moog.define('subClass', {
-        extend: 'baseClass',
-        construct: function(self, options) {
-          self._order = (self._order || []).concat('second');
-        }
-      });
-
-      moog.create('subClass', {}, function(err, subClass) {
-        assert(!err);
-        assert(subClass);
-        assert(subClass._order[0] === 'first');
-        assert(subClass._order[1] === 'second');
-        return done();
-      });
-    });
-
-    it('should extend a sync `construct` method with an async version', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('baseClass', {
-        construct: function(self, options) {
-          self._order = (self._order || []).concat('first');
-        }
-      });
-
-      moog.define('subClass', {
-        extend: 'baseClass',
-        construct: function(self, options, callback) {
-          self._order = (self._order || []).concat('second');
-          return setImmediate(callback);
-        }
-      });
-
-      moog.create('subClass', {}, function(err, subClass) {
-        assert(!err);
-        assert(subClass);
-        assert(subClass._order[0] === 'first');
-        assert(subClass._order[1] === 'second');
-        return done();
-      });
-    });
-
-    it('should extend an async `beforeConstruct` method with a sync version', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('baseClass', {
-        beforeConstruct: function(self, options, callback) {
-          self._order = (self._order || []).concat('second');
-          return setImmediate(callback);
-        }
-      });
-
-      moog.define('subClass', {
-        extend: 'baseClass',
-        beforeConstruct: function(self, options) {
-          self._order = (self._order || []).concat('first');
-        }
-      });
-
-      moog.create('subClass', {}, function(err, subClass) {
-        assert(!err);
-        assert(subClass);
-        assert(subClass._order[0] === 'first');
-        assert(subClass._order[1] === 'second');
-        return done();
-      });
-    });
-
-    it('should extend a sync `beforeConstruct` method with an async version', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('baseClass', {
-        beforeConstruct: function(self, options) {
-          self._order = (self._order || []).concat('second');
-        }
-      });
-
-      moog.define('subClass', {
-        extend: 'baseClass',
-        beforeConstruct: function(self, options, callback) {
-          self._order = (self._order || []).concat('first');
-          return setImmediate(callback);
-        }
-      });
-
-      moog.create('subClass', {}, function(err, subClass) {
-        assert(!err);
-        assert(subClass);
-        assert(subClass._order[0] === 'first');
-        assert(subClass._order[1] === 'second');
-        return done();
-      });
-    });
+    // "sync and async playing nicely" and exception-catching
+    // tests eliminated because the built-in language functionality
+    // of async/await now handles those jobs and is independently tested. -Tom
   });
 
-  describe('error handling', function() {
+  describe('odds and ends', function() {
 
-    // construct
-
-    it('should handle an async error in `construct`', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('failingClass', {
-        construct: function(self, options, callback) {
-          return callback(new Error('fail'));
-        }
-      });
-
-      moog.create('failingClass', {}, function(err, failingClass) {
-        assert(err);
-        assert(err.message === 'fail');
-        assert(!failingClass);
-        return done();
-      });
-    });
-
-    it('should handle a sync error in `construct`', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('failingClass', {
-        construct: function(self, options) {
-          throw new Error('fail');
-        }
-      });
-
-      moog.create('failingClass', {}, function(err, failingClass) {
-        assert(err);
-        assert(err.message === 'fail');
-        assert(!failingClass);
-        return done();
-      });
-    });
-
-    // beforeConstruct
-
-    it('should handle an async error in `beforeConstruct`', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('failingClass', {
-        beforeConstruct: function(self, options, callback) {
-          return callback(new Error('fail'));
-        }
-      });
-
-      moog.create('failingClass', {}, function(err, failingClass) {
-        assert(err);
-        assert(err.message === 'fail');
-        assert(!failingClass);
-        return done();
-      });
-    });
-
-    it('should handle a sync error in `construct`', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('failingClass', {
-        beforeConstruct: function(self, options) {
-          throw new Error('fail');
-        }
-      });
-
-      moog.create('failingClass', {}, function(err, failingClass) {
-        assert(err);
-        assert(err.message === 'fail');
-        assert(!failingClass);
-        return done();
-      });
-    });
-
-    // beforeConstruct
-
-    it('should invoke afterConstruct with a mixture of sync and async', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('baseClass', {
-        construct: function(self, options) {
-          self.monkeys = 3;
-        },
-        afterConstruct: function(self, callback) {
-          self.monkeys = 5;
-          return callback(null);
-        }
-      });
-
-      moog.define('subClass', {
-        extend: 'baseClass',
-        construct: function(self, options) {
-          self.monkeys = 4;
-        },
-        afterConstruct: function(self) {
-          self.monkeys = 7;
-        }
-      });
-
-      moog.create('subClass', {}, function(err, item) {
-        assert(!err);
-        assert(item);
-        assert(item.monkeys === 7);
-        return done();
-      });
-    });
-
-    it('should invoke afterConstruct with sync only', function() {
-      var moog = require('../index.js')({});
-
-      moog.define('baseClass', {
-        construct: function(self, options) {
-          self.monkeys = 3;
-        },
-        afterConstruct: function(self) {
-          self.monkeys = 5;
-        }
-      });
-
-      moog.define('subClass', {
-        extend: 'baseClass',
-        construct: function(self, options) {
-          self.monkeys = 4;
-        },
-        afterConstruct: function(self) {
-          self.monkeys = 7;
-        }
-      });
-
-      var item = moog.create('subClass', {});
-      assert(item);
-      assert(item.monkeys === 7);
-    });
-
-    it('should handle a sync error in `construct`', function(done) {
-      var moog = require('../index.js')({});
-
-      moog.define('failingClass', {
-        beforeConstruct: function(self, options) {
-          throw new Error('fail');
-        }
-      });
-
-      moog.create('failingClass', {}, function(err, failingClass) {
-        assert(err);
-        assert(err.message === 'fail');
-        assert(!failingClass);
-        return done();
-      });
-    });
-
-    // cyclical references
-
-    it('should report an error on a cyclical reference (extend in a loop)', function(done) {
-      var moog = require('../index.js')({});
+    it('should report an error on a cyclical reference (extend in a loop)', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('classOne', {
         extend: 'classTwo'
@@ -891,30 +470,10 @@ describe('moog', function() {
         extend: 'classOne'
       });
 
-      moog.create('classOne', {}, function(err, classOne) {
-        assert(err);
-        assert(!classOne);
-        return done();
-      });
-    });
-
-    // cyclical references
-
-    it('should report an error synchronously on a cyclical reference (extend in a loop) when creating synchronously', function() {
-      var moog = require('../index.js')({});
-
-      moog.define('classOne', {
-        extend: 'classTwo'
-      });
-
-      moog.define('classTwo', {
-        extend: 'classOne'
-      });
-
-      var e;
-      var classOne;
+      let e;
+      let classOne;
       try {
-        classOne = moog.create('classOne', {});
+        classOne = await moog.create('classOne', {});
       } catch (_e) {
         e = _e;
       }
@@ -923,7 +482,7 @@ describe('moog', function() {
     });
 
     it('should allow synchronous creation of a class with no asynchronous beforeConstruct or construct methods', function() {
-      var moog = require('../index.js')({});
+      const moog = require('../index.js')({});
 
       moog.define('baseclass', {
         color: 'blue',
@@ -940,18 +499,17 @@ describe('moog', function() {
         extend: 'baseclass'
       });
 
-      var obj = moog.create('subclass', {});
+      const obj = moog.createSync('subclass', {});
       assert(obj._options.color === 'purple');
     });
 
     it('should not allow synchronous creation of a class with asynchronous construct methods', function() {
-      var moog = require('../index.js')({});
+      const moog = require('../index.js')({});
 
       moog.define('baseclass', {
         color: 'blue',
-        construct: function(self, options, callback) {
+        construct: async function(self, options) {
           self._options = options;
-          return setImmediate(callback);
         }
       });
 
@@ -963,9 +521,9 @@ describe('moog', function() {
         extend: 'baseclass'
       });
 
-      var errorReported = false;
+      let errorReported = false;
       try {
-        moog.create('subclass', {});
+        moog.createSync('subclass', {});
       } catch (e) {
         errorReported = true;
       }
@@ -973,7 +531,7 @@ describe('moog', function() {
     });
 
     it('should not allow synchronous creation of a class with asynchronous beforeConstruct methods', function() {
-      var moog = require('../index.js')({});
+      const moog = require('../index.js')({});
 
       moog.define('baseclass', {
         color: 'blue',
@@ -984,16 +542,15 @@ describe('moog', function() {
 
       moog.define('subclass', {
         color: 'red',
-        beforeConstruct: function(self, options, callback) {
+        beforeConstruct: async function(self, options) {
           options.color = 'purple';
-          return setImmediate(callback);
         },
         extend: 'baseclass'
       });
 
-      var errorReported = false;
+      let errorReported = false;
       try {
-        moog.create('subclass', {});
+        moog.createSync('subclass', {});
       } catch (e) {
         errorReported = true;
       }
@@ -1001,7 +558,7 @@ describe('moog', function() {
     });
 
     it('should not allow synchronous creation of a class with asynchronous afterConstruct methods', function() {
-      var moog = require('../index.js')({});
+      const moog = require('../index.js')({});
 
       moog.define('baseclass', {
         color: 'blue',
@@ -1012,15 +569,15 @@ describe('moog', function() {
 
       moog.define('subclass', {
         color: 'red',
-        afterConstruct: function(self, callback) {
-          return setImmediate(callback);
+        afterConstruct: async function(self) {
+          await delay(10);
         },
         extend: 'baseclass'
       });
 
-      var errorReported = false;
+      let errorReported = false;
       try {
-        moog.create('subclass', {});
+        moog.createSync('subclass', {});
       } catch (e) {
         errorReported = true;
       }
@@ -1028,92 +585,27 @@ describe('moog', function() {
     });
 
     it('should report an error synchronously when creating a nonexistent type synchronously', function() {
-      var moog = require('../index.js')({});
-      var e;
-      var result;
+      const moog = require('../index.js')({});
       try {
-        result = moog.create('nonesuch');
-      } catch (_e) {
-        e = _e;
+        moog.createSync('nonesuch');
+        assert(false);
+      } catch (e) {
+        assert(true);
       }
-      assert(e);
-      assert(!result);
     });
 
-    it('should report an error asynchronously when creating a nonexistent type asynchronously', function(done) {
-      var moog = require('../index.js')({});
-      moog.create('nonesuch', function(err, result) {
-        assert(err);
-        assert(!result);
-        done();
-      });
+    it('should report an error asynchronously when creating a nonexistent type asynchronously', async function() {
+      const moog = require('../index.js')({});
+      try {
+        await moog.create('nonesuch');
+        assert(false);
+      } catch (e) {
+        assert(true);
+      }
     });
 
-    it('should allow the mirroring of a type hierarchy in a new instance of moog', function() {
-      var moog1 = require('../index.js')({});
-      var moog2 = require('../index.js')({});
-      moog1.define('pieces', {});
-      moog1.define('blog', { extend: 'pieces' });
-      moog1.define('nifty-blog', { extend: 'blog' });
-      var niftyBlog1 = moog1.create('nifty-blog');
-      moog2.mirror(niftyBlog1.__meta);
-      // now provide some actual code for the grandfather type
-      // via implicit subclassing
-      moog2.define('pieces', {
-        age: 50,
-        construct: function(self, options) {
-          self.options = options;
-        }
-      });
-      var niftyBlog2 = moog2.create('nifty-blog');
-      assert(niftyBlog2.options);
-      assert(niftyBlog2.options.age === 50);
-    });
-
-    it('should allow the suffixed mirroring of a type hierarchy in a new instance of moog', function() {
-      var moog1 = require('../index.js')({});
-      var moog2 = require('../index.js')({});
-      moog1.define('pieces', {});
-      moog1.define('blog', { extend: 'pieces' });
-      moog1.define('nifty-blog', { extend: 'blog' });
-      var niftyBlog1 = moog1.create('nifty-blog');
-      moog2.mirror(niftyBlog1.__meta, '-manager');
-      moog2.define('pieces-manager', {
-        age: 50,
-        construct: function(self, options) {
-          self.options = options;
-        }
-      });
-      var niftyBlogManager2 = moog2.create('nifty-blog-manager');
-      assert(niftyBlogManager2.options);
-      assert(niftyBlogManager2.options.age === 50);
-    });
-
-    it('mirror does not crush existing definitions', function() {
-      var moog1 = require('../index.js')({});
-      var moog2 = require('../index.js')({});
-      moog1.define('pieces', {});
-      moog1.define('blog', { extend: 'pieces' });
-      moog1.define('nifty-blog', { extend: 'blog' });
-      var niftyBlog1 = moog1.create('nifty-blog');
-
-      // now provide some actual code for the father type
-      // before calling mirror
-      moog2.define('blog', {
-        age: 50,
-        construct: function(self, options) {
-          self.options = options;
-        }
-      });
-
-      moog2.mirror(niftyBlog1.__meta);
-      var niftyBlog2 = moog2.create('nifty-blog');
-      assert(niftyBlog2.options);
-      assert(niftyBlog2.options.age === 50);
-    });
-
-    it('instanceOf should yield correct results', function() {
-      var moog = require('../index.js')({});
+    it('instanceOf should yield correct results', async function() {
+      const moog = require('../index.js')({});
 
       moog.define('classOne', {});
 
@@ -1127,11 +619,11 @@ describe('moog', function() {
         extend: 'classTwo'
       });
 
-      var one = moog.create('classOne');
-      var two = moog.create('classTwo');
-      var three = moog.create('classThree');
-      var four = moog.create('classFour');
-      var rando = { strange: 'object' };
+      const one = await moog.create('classOne');
+      const two = await moog.create('classTwo');
+      const three = await moog.create('classThree');
+      const four = await moog.create('classFour');
+      const rando = { strange: 'object' };
 
       assert(moog.instanceOf(one, 'classOne'));
       assert(moog.instanceOf(two, 'classOne'));
@@ -1139,5 +631,29 @@ describe('moog', function() {
       assert(moog.instanceOf(four, 'classOne'));
       assert(!moog.instanceOf(rando));
     });
+
+    it('sanity check of await behavior', async function() {
+      const moog = require('../index.js')({});
+      moog.define('classOne', {
+        construct: async function(self, options) {
+          await delay(100);
+          self.size = 1;
+        }
+      });
+      moog.define('classTwo', {
+        extend: 'classOne',
+        construct: async function(self, options) {
+          await delay(1);
+          self.size = 2;
+        }
+      });
+      assert((await moog.create('classTwo', {})).size === 2);
+    });
   });
 });
+
+function delay(ms) {
+  return new Promise(function(resolve, reject) {
+    setTimeout(() => resolve(true), ms);
+  });
+}
