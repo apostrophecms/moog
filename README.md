@@ -2,10 +2,14 @@
 
 [![Build Status](https://travis-ci.org/punkave/moog.svg?branch=master)](https://travis-ci.org/punkave/moog)
 
-Moog creates objects, with rich support for subclassing and "implicit subclassing" (like "categories" in Objective C). Moog implements the "self pattern," so you never have to worry about using `.call`, `.apply` or `.bind`.
+Moog provides object oriented programming services, with rich support for asynchronous constructors, modification of constructor parameters by subclasses, and "implicit subclassing" that allows a class to be replaced in a way that is transparent to end users.
+
+Moog implements the "self pattern," so you never have to worry about using `.call`, `.apply` or `.bind`.
+
+`moog` synthesizes objects with full support for inheritance. You can define them with any combination of synchronous and asynchronous constructors, specify default options easily, and modify options before they are seen by base classes.
 
 ```javascript
-var moog = require('moog')();
+const moog = require('moog')();
 
 moog.define('baseclass', {
   color: 'blue',
@@ -22,24 +26,15 @@ moog.define('baseclass', {
 moog.define('subclass', {
   color: 'red',
   // async constructor
-  construct: function(self, options, callback) {
-    return goGetTheCandy(function(err, results) {
-      if (err) {
-       return callback(err);
-      }
-      self.candy = results;
-      return callback(null);
-    });
+  construct: async function(self, options) {
+    self.candy = await goGetTheCandy();
   }
 });
 
-moog.create('subclass', { age: 20 }, function(err, obj) {
-  assert(obj._options.color === 'red');
-  assert(obj.jump(5) === 'I jumped 5 pixels high');
-});
+const obj = await moog.create('subclass', { age: 20 });
+assert(obj._options.color === 'red');
+assert(obj.jump(5) === 'I jumped 5 pixels high');
 ```
-
-`moog` synthesizes objects with full support for inheritance. You can define them with any combination of synchronous and asynchronous constructors, specify default options easily, and modify options before they are seen by base classes.
 
 ### Factory function
 
@@ -57,9 +52,9 @@ var moog = require('moog')({
 });
 ```
 
-### moog.define(type, definition)
+### moog.define(className, definition)
 
-Defines a new type. `type` is a string. 
+Defines a new class. `className` is a string. 
 
 ```javascript
 moog.define('baseclass', {
@@ -72,9 +67,9 @@ moog.define('baseclass', {
 });
 ```
 
-The `definition` object can contain the properties `construct`, `beforeConstruct`, and `afterConstruct`, which are functions invoked by `moog.create`, as described below. The `extend` property allows for subclassing. All other properties are treated as defaults for the `options` object provided when constructing an instance of the type.
+The `definition` object can contain the properties `construct`, `beforeConstruct`, and `afterConstruct`, which are functions invoked by `moog.create`, as described below. The `extend` property allows for subclassing. All other properties are treated as defaults for the `options` object provided when constructing an instance of the class.
 
-To subclass another type, just `extend` it by name in the definition of your subclass:
+To subclass another class, just `extend` it by name in the definition of your subclass:
 
 ```javascript
 moog.define('subclass', {
@@ -86,17 +81,17 @@ moog.define('subclass', {
 
 #### Default base class
 
-**If you set the `defaultBaseClass` option of `moog`** and do not explicitly `extend` anything for a particular type, then that type will extend the `defaultBaseClass`. If you wish to override this behavior for a specific type, just set `extend` to `false`.
+**If you set the `defaultBaseClass` option of `moog`** and do not explicitly `extend` anything for a particular class, then that class will extend the `defaultBaseClass`. If you wish to override this behavior for a specific class, just set `extend` to `false`.
 
 #### Implicit subclassing
 
 **If you define the same class twice** without setting `extend` the second time, an *implicit subclass* is created.
 
-The new version subclasses the old one, effectively "patching" it with new options and behavior without having to redefine everything. All other types that subclass that name now subclass the new version.
+The new version subclasses the old one, effectively "patching" it with new options and behavior **without having to redefine everything.** All other types that subclass that name now subclass the new version.
 
 ### Fallback base classes
 
-If you are not sure if there is an existing definition for the type, you can use `extendIfFirst` to specify a fallback base class. This is helpful when encouraging third-party developers to optionally define a type themselves.
+If you are not sure if there is an existing definition for a class, you can use `extendIfFirst` to specify a fallback base class. This is helpful when encouraging third-party developers to optionally define a type themselves.
 
 #### Defining many types at once
 
@@ -114,19 +109,20 @@ moog.define({
 });
 ```
 
-### moog.redefine(type, definition)
+### moog.redefine(className, definition)
 
-Explicitly replaces any previous definition of `type` with a new one. Does *not* subclass the old type. If there was no old definition, this method is equivalent to `moog.define`.
+Explicitly replaces any previous definition of `className` with a new one. Does *not* subclass the old class. If there was no old definition, this method is equivalent to `moog.define`.
 
-### moog.isDefined(type, options)
+### moog.isDefined(className, options)
 
-Returns true if the type is defined, whether explicitly or via the autoloader option. That is, `moog.create` will succeed for `type`, provided that the constructor does not signal an error. If the type is available via the autoloader, this method returns true but does not leave the definition in place.
+Returns true if the class is defined, whether explicitly or via the autoloader option. That is, `moog.create` will succeed for `className`, provided that the constructor does not signal an error. If the class is available via the autoloader, this method returns true but does not leave the definition in place.
 
-The `options` argument may be omitted entirely. If `options.autoload` is explicitly set to `false`, no attempt to test for the ability to load the type via the autoloader is made.
+The `options` argument may be omitted entirely. If `options.autoload` is explicitly set to `false`, no attempt to test for the ability to load the class via the autoloader is made.
 
-### moog.create(type, options, /* callback */)
+### await moog.create(className, options)
+### moog.createSync(className, options)
 
-Creates an object of the specified `type`, passing `options` to override any default options set in `moog.define`.
+Creates an object of the specified `class`, passing `options` to override any default options set in `moog.define`.
 
 ```javascript
 moog.define('myObject', {
@@ -142,67 +138,31 @@ alert("My object is " + myObject.color); // "My object is purple"
 
 When `create` is called, `moog` will first call `beforeConstruct`, starting with the deepest subclass first. Then the `construct` methods are called, if present, starting with the base class and ending with the final subclass. Finally the `afterConstruct` methods are called, if present, starting with the base class and ending with the final subclass.
 
-In the above example, `moog.create` is called synchronously, but could be called asynchronously as follows:
+*`moog.create` is asynchronous, and so it must be awaited.* You can also create an object with `moog.createSync`, which does not require `await`. However, *createSync will throw an exception if any of `beforeConstruct`, `construct` or `afterConstruct` throw a promise, including those in parent classes, etc.*
 
 ```javascript
-moog.create('myObject', { color: 'purple' }, function(err, myObject) {
-  alert("My object is " + myObject.color); // "My object is purple"
-});
+// Always works
+const object = await moog.create('myObject', { color: 'purple' });
+
+// Throws an exception if any construction-related functions return
+// a promise
+const object = moog.createSync('myObject', { color: 'purple' });
 ```
 
-If it's called asynchronously, the callback receives the arguments `err, obj` where `obj` is the object created. If it's called synchronously, an exception is thrown in the event of an error, otherwise the object is returned. **If you call `moog.create` synchronously but have asynchronous `beforeConstruct`, `construct`, or `afterConstruct` methods, `moog` will throw an exception.** You may, however, call `moog.create` asynchronously, even if your constructor functions are synchronous.
+#### The `__meta` property
 
 `obj` will always have a `__meta` property, which contains an array of metadata objects describing each module in the inheritance chain, starting with the base class. The metadata objects will always have a `name` property. [moog-require](https://github.com/punkave/moog-require) also provides `dirname` and `filename`. This is useful to implement template overrides, or push browser-side javascript and styles defined by each level.
 
-### moog.createAll(globalOptions, specificOptions, /* callback */)
-
-Creates one object of each type that has been defined via `moog.define` or via the `definitions` option given when configuring `moog`. Only types explicitly defined in this way are created, but they may extend types available via the `autoloader` option given when configuring `moog`.
-
-The options passed for each object consist of `globalOptions` extended by `specificOptions[type]`.
-
-If you pass a callback, it will receive an error and, if no error, an object with a property for each type name. If you do not pass a callback, such an object is returned directly. **If you do not pass a callback, then you must not define any types that have asynchronous `construct` and `beforeConstruct` methods.**
-
-## Using moog in the browser
-
-`moog` works in the browser, provided that `async` and `lodash` are already global in the browser. `moog` defines itself as `window.moog`. Currently it is not set up for use with browserify but this would be trivial to arrange.
-
-### moog.mirror(meta, suffix)
-
-Often, it is useful for the same type hierarchy to exist in two separate instances of `moog` — for instance, on the server side and the browser side. It is also often useful to recreate the same type hierarchy, but with a suffix appended to each type name.
-
-If your server-side application has a "nifty-blog" type that inherits from "blog" which inherits from "pieces", you may want to ensure that the same types are defined on the browser side, and then take advantage of implicit subclassing to supply actual code for some or all of the types in the hierarchy.
-
-To pull this off, invoke `moog.mirror` with the `__meta` property of an instance of any type:
-
-`moog.mirror(niftyBlog.__meta);`
-
-If any of the types in the hierarchy already exist, they are left alone. This allows you to safely use `moog.mirror` to patch any gaps in the type hierarchy, making sure any types that were not explicitly defined are filled in implicitly.
-
-You may also optionally pass a `suffix` as the second argument. This is helpful if you wish to define types like this:
-
-`nifty-blog-editor : blog-editor : pieces-editor`
-`nifty-blog-manager : blog-manager : pieces-manager`
-
-That code looks like:
-
-`moog.mirror(niftyBlog.__meta, '-editor')`
-
-If you are using [moog-require](https://github.com/punkave/moog-require), the `__meta` property can contain information about where your types are defined in the filesystem. You might not want to disclose that information to the web browser. To avoid that, you may filter the `__meta` object:
-
-```javascript
-var meta = {
-  chain: []
-};
-_.each(object.__meta.chain, function(entry) {
-  meta.chain.push({ name: entry.name });
-});
-```
-
-Before making it available to the browser as JSON for use in a `moog.mirror` call.
-
 ## Changelog
 
-All tests passing.
+2.0.0: this is a major version change with significant, intentional bc breaks.
+
+* `beforeConstruct`, `construct` and `afterConstruct` may all be `async` functions. They can also be simple synchronous functions of course.
+* **Support for callbacks has been removed.**
+* `beforeConstruct`, `construct` and `afterConstruct` all receive the same arguments: `(self, options)`.
+* The `mirror` method has been removed as we do not intend to use it in Apostrophe 3.x.
+* The `createAll` method has been removed as it has seen little use.
+* Explicit browser support has been removed, you may use 2.0 in the browser via `webpack`, `browserify`, etc. with appropriate Babel presets to allow `async/await` in your browser of choice.
 
 1.0.3: nudging past npm not making 1.0.2 available for some reason; no code changes.
 
