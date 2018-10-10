@@ -118,7 +118,7 @@ module.exports = function(options) {
     } = createPrep(className, options);
 
     for (let step of steps) {
-      applyOptions(options, step);
+      applyOptions(step, options);
       if (step.beforeConstruct) {
         await step.beforeConstruct(that, options);
       }
@@ -156,7 +156,7 @@ module.exports = function(options) {
     } = createPrep(className, options);
 
     steps.forEach(step => {
-      applyOptions(options, step);
+      applyOptions(step, options);
       if (step.beforeConstruct) {
         const result = step.beforeConstruct(that, options);
         if (result && result.then) {
@@ -248,7 +248,7 @@ module.exports = function(options) {
     return { that, steps };
   }
 
-  function applyOptions(options, step) {
+  function applyOptions(step, options) {
     // Apply the simple option defaults
     _.each(step, (val, key) => {
       if ((key === 'construct') || (key === 'extend') || (key === 'beforeConstruct')) {
