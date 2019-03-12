@@ -155,6 +155,9 @@ const object = moog.createSync('myObject', { color: 'purple' });
 
 ## Changelog
 
+2.0.1: `npm update`, plus removal of `package-lock.json` which is not appropriate in libraries.
+No code changes.
+ 
 2.0.0: this is a major version change with significant, intentional bc breaks.
 
 * `beforeConstruct`, `construct` and `afterConstruct` may all be `async` functions. They can also be simple synchronous functions of course.
