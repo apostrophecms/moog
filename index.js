@@ -206,12 +206,12 @@ module.exports = function(options) {
   // Given a moog class name like `my-foo` or `@namespace/my-foo`,
   // this method will return `foo` or `@namespace/my-foo`. Any other
   // name is returned as-is.
- 
+
   self.myToOriginal = function(name) {
     if (name.match(/^my-/)) {
       return name.replace(/^my-/, '');
     }
-    return name.replace(/^@([^\/]+)\/my-(.*)$/, '@$1/$2');
+    return name.replace(/^@([^/]+)\/my-(.*)$/, '@$1/$2');
   };
 
   // Given a moog class name like `foo` or `@namespace/foo`, this method
@@ -221,7 +221,7 @@ module.exports = function(options) {
 
   self.originalToMy = function(name) {
     if (name.match(/^@/)) {
-      return name.replace(/^@([^\/]+)\/(.*)$/, '@$1/my-$2');
+      return name.replace(/^@([^/]+)\/(.*)$/, '@$1/my-$2');
     } else {
       return 'my-' + name;
     }
@@ -234,7 +234,7 @@ module.exports = function(options) {
     if (name.match(/^my-/)) {
       return true;
     }
-    if (name.match(/^@([^\/]+)\/my-(.*)$/)) {
+    if (name.match(/^@([^/]+)\/my-(.*)$/)) {
       return true;
     }
     return false;
