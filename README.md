@@ -204,6 +204,8 @@ Before making it available to the browser as JSON for use in a `moog.mirror` cal
 
 All tests passing.
 
+1.1.0: borrowed `isMy`, `myToOriginal` and `originalToMy` utilities from 2.x, accommodating npm namespaces in moog type names.
+
 1.0.3: nudging past npm not making 1.0.2 available for some reason; no code changes.
 
 1.0.2: in addition to the shallow top-level clone, we must also clone the `__meta` property and its `__meta.chain` subproperty to ensure they are not reused between instances of `moog`. No other properties of the definition are objects subject to modification.

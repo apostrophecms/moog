@@ -88,7 +88,7 @@
           // implementations that need to distinguish assets that
           // come from each subclass in the inheritance chain.
           definition.extend = self.definitions[type];
-          definition.__meta.name = 'my-' + definition.__meta.name;
+          definition.__meta.name = self.originalToMy(definition.__meta.name);
         } else {
           // Extend the default base class by default, if any, unless
           // we're it
@@ -427,6 +427,43 @@
         return false;
       }
       return !!_.find(object.__meta.chain, { name: name });
+    };
+
+    // Given a moog class name like `my-foo` or `@namespace/my-foo`,
+    // this method will return `foo` or `@namespace/my-foo`. Any other
+    // name is returned as-is.
+
+    self.myToOriginal = function(name) {
+      if (name.match(/^my-/)) {
+        return name.replace(/^my-/, '');
+      }
+      return name.replace(/^@([^/]+)\/my-(.*)$/, '@$1/$2');
+    };
+
+    // Given a moog class name like `foo` or `@namespace/foo`, this method
+    // will return `my-foo` or `@namespace/my-foo` as appropriate. The behavior
+    // of this method when given a name that already has a my- prefix is
+    // undefined and should not be relied upon (see isMy).
+
+    self.originalToMy = function(name) {
+      if (name.match(/^@/)) {
+        return name.replace(/^@([^/]+)\/(.*)$/, '@$1/my-$2');
+      } else {
+        return 'my-' + name;
+      }
+    };
+
+    // Given a moog class name like `my-foo` or `@namespace/my-foo`, this
+    // method will return true. Otherwise it will return false.
+
+    self.isMy = function(name) {
+      if (name.match(/^my-/)) {
+        return true;
+      }
+      if (name.match(/^@([^/]+)\/my-(.*)$/)) {
+        return true;
+      }
+      return false;
     };
 
     return self;
