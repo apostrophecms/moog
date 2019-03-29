@@ -89,6 +89,8 @@ moog.define('subclass', {
 
 The new version subclasses the old one, effectively "patching" it with new options and behavior **without having to redefine everything.** All other types that subclass that name now subclass the new version.
 
+The `.__meta.name` property of each instance will have a `my-` prefix (or more than one, if such implicit subclassing is repeated).
+
 ### Fallback base classes
 
 If you are not sure if there is an existing definition for a class, you can use `extendIfFirst` to specify a fallback base class. This is helpful when encouraging third-party developers to optionally define a type themselves.
@@ -149,11 +151,17 @@ const object = await moog.create('myObject', { color: 'purple' });
 const object = moog.createSync('myObject', { color: 'purple' });
 ```
 
-#### The `__meta` property
+### The `__meta` property
 
 `obj` will always have a `__meta` property, which contains an array of metadata objects describing each module in the inheritance chain, starting with the base class. The metadata objects will always have a `name` property. [moog-require](https://github.com/punkave/moog-require) also provides `dirname` and `filename`. This is useful to implement template overrides, or push browser-side javascript and styles defined by each level.
 
+### `my-` utilities
+
+The methods `isMy`, `myToOriginal`, and `originalToMy` can be used to manipulate class names, detecting, adding or removing a `my-` prefix as appropriate while accommodating npm namespaces in class names. If the class name contains an npm package name (such as `@namespace/foo`), the prefix is applied to the second part, for example `@namespace/my-foo`.
+
 ## Changelog
+
+2.1.0: utilities to manipulate the `my-` prefix safely for type names with and without an npm namespace.
 
 2.0.1: `npm update`, plus removal of `package-lock.json` which is not appropriate in libraries.
 No code changes.
