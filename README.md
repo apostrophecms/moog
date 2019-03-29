@@ -161,6 +161,8 @@ The methods `isMy`, `myToOriginal`, and `originalToMy` can be used to manipulate
 
 ## Changelog
 
+2.1.1: actually use the `originalToMy` utility when implicitly subclassing.
+
 2.1.0: utilities to manipulate the `my-` prefix safely for type names with and without an npm namespace.
 
 2.0.1: `npm update`, plus removal of `package-lock.json` which is not appropriate in libraries.

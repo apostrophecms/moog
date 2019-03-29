@@ -70,7 +70,7 @@ module.exports = function(options) {
         // implementations that need to distinguish assets that
         // come from each subclass in the inheritance chain.
         definition.extend = self.definitions[className];
-        definition.__meta.name = 'my-' + definition.__meta.name;
+        definition.__meta.name = self.originalToMy(definition.__meta.name);
       } else {
         // Extend the default base class by default, if any, unless
         // we're it
