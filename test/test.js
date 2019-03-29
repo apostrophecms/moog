@@ -1139,5 +1139,30 @@ describe('moog', function() {
       assert(moog.instanceOf(four, 'classOne'));
       assert(!moog.instanceOf(rando));
     });
+
+    it('isMy behaves sensibly', function() {
+      const moog = require('../index.js')({});
+      assert(moog.isMy('my-foo'));
+      assert(!moog.isMy('foo'));
+      assert(moog.isMy('@namespace/my-foo'));
+      assert(!moog.isMy('@namespace/foo'));
+    });
+
+    it('originalToMy behaves sensibly', function() {
+      const moog = require('../index.js')({});
+      assert(moog.originalToMy('foo') === 'my-foo');
+      assert(moog.originalToMy('@namespace/foo') === '@namespace/my-foo');
+      // originalToMy is not guaranteed to do anything specific with
+      // names that already have my-
+    });
+
+    it('myToOriginal behaves sensibly', function() {
+      const moog = require('../index.js')({});
+      assert(moog.myToOriginal('my-foo') === 'foo');
+      assert(moog.myToOriginal('foo') === 'foo');
+      assert(moog.myToOriginal('@namespace/my-foo') === '@namespace/foo');
+      assert(moog.myToOriginal('@namespace/foo') === '@namespace/foo');
+    });
+
   });
 });
