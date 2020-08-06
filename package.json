@@ -1,6 +1,6 @@
 {
   "name": "moog",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Moog provides powerful module subclassing.",
   "main": "index.js",
   "dependencies": {
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/punkave/moog"
+    "url": "git://github.com/apostrophecms/moog"
   },
   "keywords": [
     "apostrophe",
@@ -33,6 +33,6 @@
     "module",
     "loader"
   ],
-  "author": "P'unk Avenue",
+  "author": "Apostrophe Technologies",
   "license": "MIT"
 }

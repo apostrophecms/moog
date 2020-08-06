@@ -1,7 +1,5 @@
 # moog
 
-[![Build Status](https://travis-ci.org/punkave/moog.svg?branch=master)](https://travis-ci.org/punkave/moog)
-
 Moog provides object oriented programming services, with rich support for asynchronous constructors, modification of constructor parameters by subclasses, and "implicit subclassing" that allows a class to be replaced in a way that is transparent to end users.
 
 Moog implements the "self pattern," so you never have to worry about using `.call`, `.apply` or `.bind`.
@@ -54,7 +52,7 @@ var moog = require('moog')({
 
 ### moog.define(className, definition)
 
-Defines a new class. `className` is a string. 
+Defines a new class. `className` is a string.
 
 ```javascript
 moog.define('baseclass', {
@@ -167,7 +165,7 @@ The methods `isMy`, `myToOriginal`, and `originalToMy` can be used to manipulate
 
 2.0.1: `npm update`, plus removal of `package-lock.json` which is not appropriate in libraries.
 No code changes.
- 
+
 2.0.0: this is a major version change with significant, intentional bc breaks.
 
 * `beforeConstruct`, `construct` and `afterConstruct` may all be `async` functions. They can also be simple synchronous functions of course.
