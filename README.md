@@ -158,6 +158,7 @@ const object = moog.createSync('myObject', { color: 'purple' });
 The methods `isMy`, `myToOriginal`, and `originalToMy` can be used to manipulate class names, detecting, adding or removing a `my-` prefix as appropriate while accommodating npm namespaces in class names. If the class name contains an npm package name (such as `@namespace/foo`), the prefix is applied to the second part, for example `@namespace/my-foo`.
 
 ## Changelog
+2.1.2 (2020-08-12): Updates ESLint to address dependency warnings.
 
 2.1.1: actually use the `originalToMy` utility when implicitly subclassing.
 
